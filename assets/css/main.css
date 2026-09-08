@@ -5,15 +5,64 @@
 :root {
   --color-profit: #10b981;
   --color-loss: #ef4444;
-  --color-neutral: #6b7280;
-  --color-grid: rgba(31, 41, 55, 0.5);
+  --color-neutral: #71717a;
+  --color-grid: rgba(39, 39, 42, 0.4);
 }
 
 body {
-  @apply bg-gray-900 text-gray-100;
+  @apply bg-gray-900 text-gray-100 antialiased;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.bg-gray-750 {
-  background-color: #2d3748;
+@layer components {
+  /* Universal Action Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-150 ease-in-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 shadow-sm focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100 dark:focus-visible:ring-offset-zinc-950;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 shadow-sm focus-visible:ring-zinc-400;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700 shadow-sm focus-visible:ring-red-500;
+  }
+
+  .btn-success {
+    @apply bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm focus-visible:ring-emerald-500;
+  }
+
+  .btn-warning {
+    @apply bg-amber-500 text-white hover:bg-amber-600 shadow-sm focus-visible:ring-amber-400;
+  }
+
+  .btn-subtle {
+    @apply text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:ring-zinc-400;
+  }
+
+  /* Micro-Border Card */
+  .dub-card {
+    @apply border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 rounded-xl shadow-sm backdrop-blur-sm transition-all duration-150;
+  }
 }
+
+@layer utilities {
+  .shadow-subtle {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-dropdown {
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  }
+  .shadow-modal {
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18);
+  }
+}
+
+

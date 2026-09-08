@@ -1,20 +1,48 @@
 <template>
-  <div :class="`kpi-card kpi-${color}`">
-    <div class="kpi-icon">{{ icon }}</div>
-    <div class="kpi-content">
-      <p class="kpi-title">{{ title }}</p>
-      <p class="kpi-value">{{ formattedValue }}</p>
-      <p v-if="change !== undefined && change !== null" :class="`kpi-change ${change >= 0 ? 'positive' : 'negative'}`">
-        {{ change >= 0 ? '▲' : '▼' }} {{ Math.abs(change) }}%
-      </p>
-      <p v-if="subtitle" class="kpi-subtitle">{{ subtitle }}</p>
-      <p v-if="trades" class="kpi-trades">{{ trades }}</p>
+  <div class="dub-card p-5 space-y-3 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+        <span>{{ title }}</span>
+        <AppTooltip v-if="subtitle" :text="subtitle" :title="title">
+          <svg class="w-3.5 h-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </AppTooltip>
+      </div>
+
+      <!-- Icon / Change Pill -->
+      <div v-if="change !== undefined && change !== null">
+        <AppBadge
+          :variant="change >= 0 ? 'success' : 'danger'"
+          size="xs"
+        >
+          <template #startIcon>
+            <span>{{ change >= 0 ? '↑' : '↓' }}</span>
+          </template>
+          {{ Math.abs(change) }}%
+        </AppBadge>
+      </div>
+      <div v-else-if="icon" class="text-xs text-zinc-400">
+        {{ icon }}
+      </div>
+    </div>
+
+    <!-- Value -->
+    <div class="flex items-baseline justify-between">
+      <div class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 font-mono">
+        {{ formattedValue }}
+      </div>
+      <div v-if="trades" class="text-xs text-zinc-400 font-mono">
+        {{ trades }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import AppTooltip from '~/components/Common/AppTooltip.vue'
+import AppBadge from '~/components/Common/AppBadge.vue'
 
 const props = defineProps<{
   title: string
@@ -22,13 +50,13 @@ const props = defineProps<{
   change?: number
   subtitle?: string
   trades?: string
-  icon: string
+  icon?: string
   color?: string
 }>()
 
 const formattedValue = computed(() => {
   if (typeof props.value === 'number') {
-    return props.value.toLocaleString('es-CO', {
+    return props.value.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     })
@@ -38,60 +66,5 @@ const formattedValue = computed(() => {
 </script>
 
 <style scoped>
-.kpi-card {
-  @apply bg-gradient-to-br p-6 rounded-lg border border-opacity-20 hover:shadow-lg transition-all duration-300 cursor-pointer;
-}
-
-.kpi-green {
-  @apply from-green-900 to-green-800 border-green-600;
-}
-
-.kpi-blue {
-  @apply from-blue-900 to-blue-800 border-blue-600;
-}
-
-.kpi-red {
-  @apply from-red-900 to-red-800 border-red-600;
-}
-
-.kpi-purple {
-  @apply from-purple-900 to-purple-800 border-purple-600;
-}
-
-.kpi-gold {
-  @apply from-yellow-900 to-yellow-800 border-yellow-600;
-}
-
-.kpi-icon {
-  @apply text-4xl mb-2;
-}
-
-.kpi-content {
-  @apply space-y-1;
-}
-
-.kpi-title {
-  @apply text-sm text-gray-300 font-medium;
-}
-
-.kpi-value {
-  @apply text-2xl font-bold text-white;
-}
-
-.kpi-change {
-  @apply text-sm font-semibold mt-1;
-}
-
-.kpi-change.positive {
-  @apply text-green-400;
-}
-
-.kpi-change.negative {
-  @apply text-red-400;
-}
-
-.kpi-subtitle,
-.kpi-trades {
-  @apply text-xs text-gray-300 mt-1;
-}
+/* Component styles */
 </style>

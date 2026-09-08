@@ -1,86 +1,142 @@
 <template>
-  <div class="trades-table-container">
+  <div class="space-y-4">
     <!-- Toolbar -->
-    <div v-if="!loading" class="table-toolbar">
-      <div class="toolbar-info">
-        <span>{{ trades.length }} operaciones</span>
+    <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+      <div class="flex-1 min-w-[240px]">
+        <AppInput
+          v-model="searchQuery"
+          placeholder="Filter trades by symbol, type, or ID (e.g. EURUSD, BUY)..."
+          size="sm"
+        />
       </div>
-      <button @click="showCompareModal = true" class="compare-btn">
-        <span class="btn-icon">📊</span>
-        Comparar Operaciones
-      </button>
+
+      <div class="flex items-center gap-2">
+        <AppButton
+          variant="secondary"
+          size="sm"
+          @click="showCompareModal = true"
+        >
+          <template #startIcon>
+            <span>📊</span>
+          </template>
+          {{ t('nav.compare') }}
+        </AppButton>
+      </div>
     </div>
 
-    <div v-if="loading" class="loading">⏳ Cargando operaciones...</div>
-    
-    <div v-else class="table-wrapper">
-      <table class="trades-table">
+    <!-- Skeleton Loading State -->
+    <div v-if="loading" class="space-y-2 py-2">
+      <AppSkeleton height="h-10" />
+      <AppSkeleton height="h-10" />
+      <AppSkeleton height="h-10" />
+      <AppSkeleton height="h-10" />
+    </div>
+
+    <!-- Table -->
+    <div v-else-if="paginatedTrades.length > 0" class="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-card bg-white dark:bg-zinc-900/40">
+      <table class="w-full border-collapse text-left">
         <thead>
-          <tr>
-            <th @click="sortBy('open_time')">
-              📅 Fecha Apertura
-              <span v-if="sortColumn === 'open_time'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+          <tr class="bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 text-[11px] font-semibold uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800 select-none">
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('open_time')">
+              Open Time
+              <span v-if="sortColumn === 'open_time'" class="ml-1">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th @click="sortBy('symbol')">
-              🔤 Símbolo
-              <span v-if="sortColumn === 'symbol'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('symbol')">
+              Symbol
+              <span v-if="sortColumn === 'symbol'" class="ml-1">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th @click="sortBy('order_type')">📌 Tipo</th>
-            <th @click="sortBy('volume')">📦 Volumen</th>
-            <th @click="sortBy('open_price')">📍 Entrada</th>
-            <th @click="sortBy('close_price')">🎯 Salida</th>
-            <th @click="sortBy('profit_usd')">
-              💰 P&L ($)
-              <span v-if="sortColumn === 'profit_usd'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('order_type')">
+              Type
             </th>
-            <th @click="sortBy('profit_pct')">📊 P&L (%)</th>
-            <th @click="sortBy('duration')">⏱️ Duración</th>
-            <th>📝 Status</th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('volume')">
+              Lots
+            </th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('open_price')">
+              Entry
+            </th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('close_price')">
+              Exit
+            </th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('profit_usd')">
+              P&L ($)
+              <span v-if="sortColumn === 'profit_usd'" class="ml-1">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('profit_pct')">
+              P&L (%)
+            </th>
+            <th class="px-4 py-3 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition whitespace-nowrap" @click="sortBy('duration')">
+              Duration
+            </th>
+            <th class="px-4 py-3">Outcome</th>
           </tr>
         </thead>
-        <tbody>
-          <tr 
-            v-for="trade in sortedTrades" 
-            :key="trade.id" 
-            :class="`status-${trade.status}`"
+        <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800/80">
+          <tr
+            v-for="trade in paginatedTrades"
+            :key="trade.id"
             @click="selectedTrade = trade"
-            class="cursor-pointer"
+            class="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 cursor-pointer transition-colors"
           >
-            <td>{{ formatDate(trade.open_time) }}</td>
-            <td class="font-bold">{{ trade.symbol }}</td>
-            <td>
-              <span :class="trade.order_type === 'BUY' ? 'text-green-400' : 'text-red-400'">
+            <td class="px-4 py-3 font-mono text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
+              {{ formatDate(trade.open_time) }}
+            </td>
+            <td class="px-4 py-3 font-semibold text-xs text-zinc-900 dark:text-zinc-100">
+              {{ trade.symbol }}
+            </td>
+            <td class="px-4 py-3">
+              <AppBadge :variant="trade.order_type === 'BUY' ? 'success' : 'danger'" size="xs">
                 {{ trade.order_type }}
-              </span>
+              </AppBadge>
             </td>
-            <td>{{ trade.volume }}</td>
-            <td>{{ trade.open_price.toFixed(5) }}</td>
-            <td>{{ trade.close_price.toFixed(5) }}</td>
-            <td :class="profitColor(trade.profit_usd)">
-              {{ formatCurrency(trade.profit_usd) }}
+            <td class="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-300">
+              {{ trade.volume }}
             </td>
-            <td :class="profitColor(trade.profit_pct)">
-              {{ trade.profit_pct.toFixed(2) }}%
+            <td class="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-300">
+              {{ trade.open_price.toFixed(5) }}
             </td>
-            <td>{{ formatDuration(trade.duration) }}</td>
-            <td>
-              <span :class="`status-badge status-${trade.status}`">
+            <td class="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-300">
+              {{ trade.close_price.toFixed(5) }}
+            </td>
+            <td class="px-4 py-3 font-mono text-xs font-semibold whitespace-nowrap" :class="trade.profit_usd >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'">
+              {{ trade.profit_usd >= 0 ? '+' : '' }}{{ formatCurrency(trade.profit_usd) }}
+            </td>
+            <td class="px-4 py-3 font-mono text-xs whitespace-nowrap" :class="trade.profit_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'">
+              {{ trade.profit_pct >= 0 ? '+' : '' }}{{ trade.profit_pct.toFixed(2) }}%
+            </td>
+            <td class="px-4 py-3 text-xs text-zinc-400">
+              {{ formatDuration(trade.duration) }}
+            </td>
+            <td class="px-4 py-3">
+              <AppBadge :variant="getStatusVariant(trade.status)" size="xs" :dot="true">
                 {{ trade.status }}
-              </span>
+              </AppBadge>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    
-    <div v-if="!loading" class="table-footer">
-      Mostrando {{ trades.length }} de {{ total || trades.length }} operaciones
-    </div>
 
-    <TradeChartModal 
-      v-if="selectedTrade" 
-      :trade="selectedTrade" 
-      @close="selectedTrade = null" 
+    <!-- Empty State -->
+    <AppEmptyState
+      v-else
+      title="No trades found"
+      description="No trade execution records match your active search or filter criteria."
+    />
+
+    <!-- Pagination -->
+    <AppPagination
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total-items="filteredTrades.length"
+      @update:current-page="currentPage = $event"
+      @update:page-size="pageSize = $event"
+    />
+
+    <!-- Modals -->
+    <TradeChartModal
+      v-if="selectedTrade"
+      :trade="selectedTrade"
+      @close="selectedTrade = null"
     />
 
     <BacktestingCompareModal
@@ -92,10 +148,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Trade } from '~/types/analytics'
 import TradeChartModal from './TradeChartModal.vue'
 import BacktestingCompareModal from './BacktestingCompareModal.vue'
+import AppPagination from '~/components/Common/AppPagination.vue'
+import AppSkeleton from '~/components/Common/AppSkeleton.vue'
+import AppButton from '~/components/Common/AppButton.vue'
+import AppInput from '~/components/Common/AppInput.vue'
+import AppBadge from '~/components/Common/AppBadge.vue'
+import AppEmptyState from '~/components/Common/AppEmptyState.vue'
+import { useI18n } from '~/composables/useI18n'
 
 const props = defineProps<{
   trades: Trade[]
@@ -103,13 +166,41 @@ const props = defineProps<{
   total?: number
 }>()
 
+const { t } = useI18n()
+
 const sortColumn = ref('open_time')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const selectedTrade = ref<Trade | null>(null)
 const showCompareModal = ref(false)
 
+const searchQuery = ref('')
+const debouncedSearch = ref('')
+let debounceTimer: any = null
+
+watch(searchQuery, (newVal) => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    debouncedSearch.value = newVal.toLowerCase().trim()
+    currentPage.value = 1
+  }, 300)
+})
+
+const currentPage = ref(1)
+const pageSize = ref(20)
+
+const filteredTrades = computed(() => {
+  if (!debouncedSearch.value) return props.trades
+
+  return props.trades.filter(t => 
+    t.symbol.toLowerCase().includes(debouncedSearch.value) ||
+    t.order_type.toLowerCase().includes(debouncedSearch.value) ||
+    t.status.toLowerCase().includes(debouncedSearch.value) ||
+    String(t.id).includes(debouncedSearch.value)
+  )
+})
+
 const sortedTrades = computed(() => {
-  const sorted = [...props.trades].sort((a: any, b: any) => {
+  return [...filteredTrades.value].sort((a: any, b: any) => {
     const aVal = a[sortColumn.value]
     const bVal = b[sortColumn.value]
     
@@ -119,7 +210,11 @@ const sortedTrades = computed(() => {
       return aVal < bVal ? 1 : -1
     }
   })
-  return sorted
+})
+
+const paginatedTrades = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return sortedTrades.value.slice(start, start + pageSize.value)
 })
 
 const sortBy = (column: string) => {
@@ -131,153 +226,23 @@ const sortBy = (column: string) => {
   }
 }
 
-const formatDate = (date: string) => new Date(date).toLocaleDateString('es-CO')
-const formatDuration = (mins: number) => `${Math.round(mins / 60)}h ${mins % 60}m`
-const formatCurrency = (val: number) => new Intl.NumberFormat('es-CO', { 
+const getStatusVariant = (status: string) => {
+  if (status === 'GANADOR' || status === 'WINNER') return 'success'
+  if (status === 'PERDEDOR' || status === 'LOSER') return 'danger'
+  return 'neutral'
+}
+
+const formatDate = (date: string) => new Date(date).toLocaleString()
+const formatDuration = (mins: number) => {
+  if (mins < 60) return `${mins}m`
+  return `${Math.floor(mins / 60)}h ${mins % 60}m`
+}
+const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { 
   style: 'currency', 
   currency: 'USD' 
 }).format(val)
-const profitColor = (val: number) => val > 0 ? 'text-green-400 font-bold' : val < 0 ? 'text-red-400 font-bold' : 'text-gray-400'
 </script>
 
 <style scoped>
-.trades-table-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.table-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background-color: #1f2937;
-  border-radius: 0.5rem;
-  border: 1px solid #374151;
-}
-
-.toolbar-info {
-  color: #9ca3af;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.compare-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-}
-
-.compare-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-}
-
-.compare-btn:active {
-  transform: translateY(0);
-}
-
-.btn-icon {
-  font-size: 1rem;
-}
-
-.loading {
-  text-align: center;
-  color: #9ca3af;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-  border-radius: 0.5rem;
-  border: 1px solid #374151;
-}
-
-.trades-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.trades-table thead {
-  background-color: #374151;
-  position: sticky;
-  top: 0;
-}
-
-.trades-table th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  color: #e5e7eb;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.trades-table th:hover {
-  background-color: #4b5563;
-}
-
-.trades-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #374151;
-  color: #d1d5db;
-}
-
-.trades-table tbody tr {
-  transition: background-color 0.2s;
-}
-
-.trades-table tbody tr:hover {
-  background-color: rgba(55, 65, 81, 0.5);
-}
-
-.status-GANADOR {
-  background-color: rgba(6, 78, 59, 0.1);
-}
-
-.status-PERDEDOR {
-  background-color: rgba(127, 29, 29, 0.1);
-}
-
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.status-badge.status-GANADOR {
-  background-color: #059669;
-  color: white;
-}
-
-.status-badge.status-PERDEDOR {
-  background-color: #dc2626;
-  color: white;
-}
-
-.status-badge.status-BREAK_EVEN {
-  background-color: #4b5563;
-  color: white;
-}
-
-.table-footer {
-  color: #9ca3af;
-  font-size: 0.875rem;
-  margin-top: 1rem;
-}
+/* Component styles */
 </style>

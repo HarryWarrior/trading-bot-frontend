@@ -1,25 +1,23 @@
 <template>
-  <div class="equity-chart-container">
-    <h2 class="chart-title">📈 Curva de Capital</h2>
-    
+  <div class="space-y-4">
     <div id="equity-chart" class="w-full h-96"></div>
     
-    <div class="chart-stats">
-      <div class="stat">
-        <span>Capital Inicial:</span>
-        <span class="font-bold">{{ formatCurrency(initialBalance) }}</span>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+      <div class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/60 p-3 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 text-xs">
+        <span class="text-zinc-500 dark:text-zinc-400">Initial Balance:</span>
+        <span class="font-semibold font-mono text-zinc-900 dark:text-zinc-100">{{ formatCurrency(initialBalance) }}</span>
       </div>
-      <div class="stat">
-        <span>Capital Final:</span>
-        <span class="font-bold">{{ formatCurrency(finalBalance) }}</span>
+      <div class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/60 p-3 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 text-xs">
+        <span class="text-zinc-500 dark:text-zinc-400">Final Balance:</span>
+        <span class="font-semibold font-mono text-zinc-900 dark:text-zinc-100">{{ formatCurrency(finalBalance) }}</span>
       </div>
-      <div class="stat">
-        <span>Drawdown Máximo:</span>
-        <span class="font-bold text-red-400">{{ analytics?.max_drawdown }}</span>
+      <div class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/60 p-3 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 text-xs">
+        <span class="text-zinc-500 dark:text-zinc-400">Max Drawdown:</span>
+        <span class="font-semibold font-mono text-rose-600 dark:text-rose-400">{{ analytics?.max_drawdown }}</span>
       </div>
-      <div class="stat">
-        <span>Mejor Día:</span>
-        <span class="font-bold text-green-400">{{ formatCurrency(analytics?.best_day_profit || 0) }}</span>
+      <div class="flex justify-between items-center bg-zinc-50 dark:bg-zinc-800/60 p-3 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 text-xs">
+        <span class="text-zinc-500 dark:text-zinc-400">Best Day Profit:</span>
+        <span class="font-semibold font-mono text-emerald-600 dark:text-emerald-400">{{ formatCurrency(analytics?.best_day_profit || 0) }}</span>
       </div>
     </div>
   </div>
@@ -39,7 +37,7 @@ const initialBalance = ref(0)
 const finalBalance = ref(0)
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('es-CO', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD'
   }).format(value)
@@ -50,7 +48,6 @@ const renderChart = async () => {
     return
   }
   
-  // Usar dates/values de props si están disponibles, sino usar del analytics
   const dates = props.dates || props.analytics.equity_dates
   const values = props.values || props.analytics.equity_curve
   
@@ -59,7 +56,6 @@ const renderChart = async () => {
   initialBalance.value = values[0]
   finalBalance.value = values[values.length - 1]
   
-  // Importar Plotly dinámicamente
   const Plotly = await import('plotly.js-dist-min')
   
   const trace = {
@@ -70,27 +66,34 @@ const renderChart = async () => {
     name: 'Equity',
     line: {
       color: '#10b981',
-      width: 2
+      width: 2.5
     },
     fill: 'tozeroy',
-    fillcolor: 'rgba(16, 185, 129, 0.1)'
+    fillcolor: 'rgba(16, 185, 129, 0.08)'
   }
   
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+
   const layout = {
     title: '',
     xaxis: { 
-      title: 'Fecha',
-      color: '#9ca3af'
+      title: 'Date',
+      color: isDark ? '#a1a1aa' : '#71717a',
+      gridcolor: isDark ? 'rgba(39, 39, 42, 0.5)' : 'rgba(228, 228, 231, 0.6)'
     },
     yaxis: { 
       title: 'Balance ($)',
-      color: '#9ca3af'
+      color: isDark ? '#a1a1aa' : '#71717a',
+      gridcolor: isDark ? 'rgba(39, 39, 42, 0.5)' : 'rgba(228, 228, 231, 0.6)'
     },
     hovermode: 'closest',
-    plot_bgcolor: 'rgba(31, 41, 55, 0.5)',
-    paper_bgcolor: 'rgba(17, 24, 39, 0)',
-    font: { color: '#fff' },
-    margin: { t: 20, r: 20, b: 40, l: 60 }
+    plot_bgcolor: 'transparent',
+    paper_bgcolor: 'transparent',
+    font: { 
+      color: isDark ? '#fafafa' : '#09090b',
+      family: 'Inter, sans-serif'
+    },
+    margin: { t: 15, r: 20, b: 40, l: 60 }
   }
   
   const config = {
@@ -111,19 +114,5 @@ watch(() => props.analytics, () => {
 </script>
 
 <style scoped>
-.equity-chart-container {
-  @apply space-y-4;
-}
-
-.chart-title {
-  @apply text-2xl font-bold text-white;
-}
-
-.chart-stats {
-  @apply grid grid-cols-2 md:grid-cols-4 gap-4;
-}
-
-.stat {
-  @apply flex justify-between items-center bg-gray-700 p-3 rounded;
-}
+/* Component styles */
 </style>

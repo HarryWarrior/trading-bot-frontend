@@ -25,6 +25,20 @@ trading-bot-frontend/
 │   │   ├── TradesTable.vue         # Paginated, filtered trade execution table
 │   │   ├── BacktestingCompareModal # Multi-trade comparison modal (1x1, 2x1, 2x2 grids)
 │   │   └── TradeChartModal.vue     # TradingView Lightweight Charts modal
+│   └── Common/
+│       ├── AppButton.vue           # Universal button primitive with variants & loading state
+│       ├── AppInput.vue            # Accessible input with mandatory eye password toggle
+│       ├── AppBadge.vue            # Semantic status & indicator pill
+│       ├── AppMetricCard.vue       # Institutional KPI card with tooltips & delta badges
+│       ├── AppModal.vue            # Accessible modal dialog with backdrop blur
+│       ├── AppConfirmDeleteModal.vue # Destructive action double-confirmation dialog
+│       ├── AppEmptyState.vue       # Dashed empty state placeholder with CTA
+│       ├── AppHeader.vue           # Global workstation header (Workspace, Search, Avatar)
+│       ├── AppSidebar.vue          # Navigation sidebar with usage meter
+│       ├── AppAuthCard.vue         # Multi-mode Login/Register card with OAuth
+│       ├── AppPagination.vue       # Standardized pagination & page size controller
+│       ├── AppSkeleton.vue         # Placeholder skeletons for loading states
+│       └── AppTooltip.vue          # Floating definition & KPI tooltip
 ├── stores/
 │   ├── analytics.ts                # Pinia store for analytics, trades, and file uploads
 │   └── i18n.ts                     # Pinia multi-language store (English / Spanish)
@@ -45,6 +59,7 @@ trading-bot-frontend/
 
 * **Core Framework:** Nuxt `3.8.0` / Vue `3.3.0`
 * **TypeScript:** Version `5.3.0` (Strict mode enabled)
+* **Iconography:** [Lucide Icons](https://lucide.dev/icons/) (`lucide-vue-next 0.344.0`)
 * **State Management:** Pinia `2.1.0` via `@pinia/nuxt`
 * **Styling Framework:** Tailwind CSS `3.3.0` with `@nuxtjs/tailwindcss`
 * **Visualization Engines:**
@@ -122,27 +137,26 @@ runtimeConfig: {
 
 ## 6. UI Standards & Reusable Component Specifications
 
-### 6.1 Action Buttons Standard
-```html
-<!-- Add / Primary Action -->
-<button class="btn btn-primary">
-  <span>+</span> Add Item
-</button>
+### 6.1 Action Buttons Standard (`<AppButton>`)
+* **Props:** `variant: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'subtle'`, `size: 'xs' | 'sm' | 'md' | 'lg'`, `loading: boolean`, `disabled: boolean`, `block: boolean`.
+* **Slots:** `default` (label), `startIcon`, `endIcon`.
 
-<!-- Destructive / Delete Action with Trash Icon -->
-<button class="btn btn-danger" @click="confirmDelete">
-  <span>🗑️</span> Delete
-</button>
+### 6.2 Form Inputs Standard (`<AppInput>`)
+* **Props:** `modelValue: string | number`, `label: string`, `type: string`, `placeholder: string`, `error: string`, `hint: string`, `required: boolean`, `disabled: boolean`.
+* **Password Eye Toggle:** Automatically rendered for `type="password"` with accessible ARIA toggle button.
 
-<!-- Secondary / Filter Action -->
-<button class="btn btn-secondary">
-  <span>🔍</span> Filter
-</button>
-```
+### 6.3 Metric & KPI Cards (`<AppMetricCard>`)
+* **Props:** `title: string`, `value: string | number`, `delta: number | string`, `isPositive: boolean`, `tooltip: string`, `subtitle: string`.
+* **Slots:** `badge`, `footer`.
 
-### 6.2 Tooltip Specification (`v-tooltip`)
-* Binds to any interactive element with `v-tooltip="'Explanation text'"` or `<AppTooltip text="..." />`.
-* Displays a floating dark tooltip positioned above or below the target with a smooth fade transition.
+### 6.4 Modals & Dialogs (`<AppModal>`, `<AppConfirmDeleteModal>`)
+* **`<AppModal>`:** Teleported to `<body>`, handles `Escape` key and backdrop dismissal.
+* **`<AppConfirmDeleteModal>`:** Enforces double-confirmation via exact typed string match before emitting `@confirm`.
+
+### 6.5 Tooltip Specification (`<AppTooltip>`)
+* **Props:** `text: string`, `title?: string`.
+* Displays a floating dark tooltip positioned above the target with a smooth fade transition.
+
 
 ---
 

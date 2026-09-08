@@ -17,6 +17,20 @@ trading-bot-frontend/
 │   │   ├── CalendarHeatmap   # Daily performance heatmap
 │   │   ├── TradesTable.vue   # Filtered trades table
 │   │   └── TradeChartModal   # Lightweight charts modal
+│   └── Common/
+│       ├── AppButton.vue     # Reusable action button
+│       ├── AppInput.vue      # Input with password eye toggle
+│       ├── AppBadge.vue      # Status & indicator badges
+│       ├── AppMetricCard.vue # KPI card with tooltip & deltas
+│       ├── AppModal.vue      # Backdrop blur modal
+│       ├── AppConfirmDeleteModal.vue # Double-confirmation modal
+│       ├── AppEmptyState.vue # Dashed empty state view
+│       ├── AppHeader.vue     # Workstation top navigation
+│       ├── AppSidebar.vue    # Collapsible sidebar with usage meter
+│       ├── AppAuthCard.vue   # Login/Registration form
+│       ├── AppPagination.vue # Pagination & page size selector
+│       ├── AppSkeleton.vue   # Anti-flicker loading skeleton
+│       └── AppTooltip.vue    # Acronym & definition tooltip
 ├── pages/
 │   ├── index.vue             # Dashboard main
 │   ├── upload.vue            # File ingestion

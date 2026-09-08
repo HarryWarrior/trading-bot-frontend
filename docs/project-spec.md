@@ -51,14 +51,19 @@ All action buttons must adhere to unified variant tokens and responsive states:
 * **Debounced Search Inputs:**
   * All search inputs must incorporate a `300ms` debounce (`useDebounceFn`) before triggering API queries to prevent network spam.
 
-### 3.3 Intuitive Iconography & Visual Language
-* **Deletion / Removal:** Universal trash can symbol (`🗑️`).
-* **Trend Indicators:** Upward green arrow (`↑`) for positive P&L / winning trades; downward red arrow (`↓`) for negative P&L / drawdown.
+### 3.3 Intuitive Iconography & Visual Language ([Lucide Icons](https://lucide.dev/icons/))
+* **Official Icon Library:** All UI components, buttons, tables, and navigation links MUST use **Lucide Icons** (`lucide-vue-next` / `https://lucide.dev/icons/`).
+* **Standard Lucide Icons by Context:**
+  * **Deletion / Removal:** `Trash2` icon (`<Trash2 class="w-4 h-4 text-red-500" />`).
+  * **Trend & Direction:** `TrendingUp` / `ArrowUpRight` (green) for positive P&L; `TrendingDown` / `ArrowDownRight` (red) for drawdown.
+  * **Actions:** `Plus` (Add), `Upload` (File Import), `Pencil` (Edit), `Search` (Query), `Copy` (Clipboard), `Download` (Export).
+  * **Navigation:** `BarChart3` (Analytics), `BookOpen` (Journal), `Globe` (Domains/Brokers), `Settings` (Configuration), `HelpCircle` (Tooltips).
+  * **Security & Auth:** `Lock` (Password), `Mail` (Email), `User` (Profile), `Eye` / `EyeOff` (Password toggle).
 * **Status Badges:**
-  * `GANADOR` / `WINNER`: Emerald badge (`bg-emerald-950 text-emerald-300 border-emerald-500`).
-  * `PERDEDOR` / `LOSER`: Rose badge (`bg-rose-950 text-rose-300 border-rose-500`).
-  * `BREAK_EVEN`: Slate/Cyan badge (`bg-slate-800 text-slate-300 border-slate-600`).
-* **Paging & Sorting:** Sort arrows (`↕`, `▲`, `▼`) on table column headers.
+  * `GANADOR` / `WINNER`: Emerald badge with `TrendingUp` (`bg-emerald-950 text-emerald-300 border-emerald-500`).
+  * `PERDEDOR` / `LOSER`: Rose badge with `TrendingDown` (`bg-rose-950 text-rose-300 border-rose-500`).
+  * `BREAK_EVEN`: Slate/Cyan badge with `Minus` (`bg-slate-800 text-slate-300 border-slate-600`).
+* **Paging & Sorting:** Sort arrows (`ArrowUpDown`, `ChevronUp`, `ChevronDown`, `ChevronLeft`, `ChevronRight`).
 
 ### 3.4 Universal Drag & Drop File Upload Standard (`<AppFileDropzone>`)
 * **States:** Default border, drag-over highlight with glowing border, processing state with spinner, success banner, and error alert.
@@ -76,8 +81,28 @@ All action buttons must adhere to unified variant tokens and responsive states:
 * Fully typed dictionary keys supporting dynamic runtime switching between **English (`en`)** and **Spanish (`es`)**.
 * Default application locale: English.
 
-### 3.8 Dark Theme, Color Customization & Responsive Layouts
-* **Tailwind Color Palette:** Defined using CSS custom properties (`--color-bg-primary`, `--color-pnl-win`, `--color-pnl-loss`) to enable dynamic dark/light terminal themes.
+### 3.8 Dub.co / Modern SaaS Design Tokens & Aesthetic Standards
+* **Micro-Borders & Subtle Shadows:**
+  * All cards, containers, and popovers utilize `1px` subtle borders (`border-zinc-200 dark:border-zinc-800`) combined with diffused multi-layer shadows (`shadow-card` / `shadow-subtle`).
+  * Modal overlays use backdrop blur filters (`backdrop-blur-sm bg-black/50`).
+* **Interactive States & Focus Rings:**
+  * Interactive components must implement high-contrast accessible focus indicators: `focus-visible:ring-2 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-100 focus-visible:ring-offset-2`.
+  * Hover transitions strictly use ultra-crisp `150ms` easing (`transition-all duration-150 ease-in-out`).
+
+### 3.9 Reusable Component Library Catalog (`components/Common/`)
+* **`<AppButton>`:** Universal button primitive with `variant` (`primary`, `secondary`, `danger`, `success`, `warning`, `subtle`), `size` (`xs`, `sm`, `md`, `lg`), `loading` spinner, and `startIcon`/`endIcon` slots.
+* **`<AppInput>`:** Form input primitive featuring accessible labels, error/hint messaging, micro-borders, and **mandatory interactive eye password visibility toggle (`👁️` / `🙈`)** conforming to security directives.
+* **`<AppBadge>`:** Semantic indicator pill supporting `variant` (`success`, `danger`, `warning`, `info`, `primary`, `neutral`), optional live status `dot`, and icon slots.
+* **`<AppMetricCard>`:** Institutional KPI card featuring financial acronym tooltips (`<AppTooltip>`), delta percentage trend badges, and high-precision typography.
+* **`<AppModal>`:** Accessible teleported dialog with backdrop blur, keyboard `Escape` dismissal, and configurable max-width.
+* **`<AppConfirmDeleteModal>`:** Double-confirmation destructive modal enforcing typed resource name confirmation before allowing permanent deletions.
+* **`<AppEmptyState>`:** Dashed-border empty view placeholder (`border-dashed border-2 border-zinc-200 dark:border-zinc-800`) with illustration icon and direct CTA action.
+* **`<AppHeader>`:** Global workstation header integrating workspace switcher, command search trigger (`⌘K`), i18n locale switch, notifications, and profile menu.
+* **`<AppSidebar>`:** Collapsible navigation rail with active indicator pill, usage progress meter, and documentation links.
+* **`<AppAuthCard>`:** Multi-mode Login/Registration authentication card with OAuth buttons, eye toggle inputs, and password strength validation indicators.
+
+### 3.10 Dark Theme, Color Customization & Responsive Layouts
+* **Tailwind Color Palette:** Neutral base built on `zinc` scale with semantic highlights for financial calculations (`--color-profit`, `--color-loss`, `--color-neutral`).
 * **Responsive Breakpoints:**
   * Mobile (`< 640px`): Single-column stacked cards, collapsed tables.
   * Tablet (`640px - 1024px`): 2-3 column KPI ribbon, horizontal scrolling table.
