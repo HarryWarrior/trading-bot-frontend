@@ -1,6 +1,6 @@
 # 000 — Agents Foundation, frontend (design)
 
-- **Status:** in-progress (approved 2026-11-23)
+- **Status:** done (merged to dev 2026-11-23)
 - **Date:** 2026-11-23
 - **Main design (source of truth for intent, constraints, workflow):**
   `Trading-bot-backend/specs/000-agents-foundation/design.md`
