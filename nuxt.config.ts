@@ -10,6 +10,17 @@ export default defineNuxtConfig({
 
     css: ['~/assets/css/main.css'],
 
+    // Feature modules (see .agents/rules/architecture.md): components auto-registered without
+    // path prefix, composables and stores auto-imported.
+    components: [
+        { path: '~/components', pathPrefix: true },
+        { path: '~/features', pattern: '*/components/**/*.vue', pathPrefix: false }
+    ],
+
+    imports: {
+        dirs: ['features/*/composables', 'features/*/stores']
+    },
+
     runtimeConfig: {
         public: {
             apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
