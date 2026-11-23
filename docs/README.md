@@ -1,91 +1,15 @@
-# Trading Bot Frontend - Vue 3 + Nuxt 3
+# Frontend documentation
 
-Professional frontend interface for real-time trading bot control with Vue 3 and Nuxt 3. Features comprehensive dashboard, account management, positions tracking, live charts, strategy control panel, and order management with beautiful Tailwind CSS design.
+Start with [`AGENTS.md`](../AGENTS.md) for the product, stack, commands and golden rules.
 
-## Project Structure
+| Document | Content |
+|---|---|
+| [architecture.md](architecture.md) | Layers, feature modules, shared components, current vs target |
+| [features-catalog.md](features-catalog.md) | Every feature: purpose, status, backend services, spec |
+| [adr/](adr/) | Frontend decision records |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
+| [../specs/README.md](../specs/README.md) | Specs (numbers shared with the backend) |
+| [../.agents/rules/](../.agents/rules/) | How to build |
 
-```
-trading-bot-frontend/
-├── app.vue                    # Root component
-├── nuxt.config.ts            # Nuxt configuration
-├── tailwind.config.js        # Tailwind configuration
-├── tsconfig.json             # TypeScript configuration
-├── components/
-│   ├── Analytics/
-│   │   ├── KpiCard.vue       # KPI display card
-│   │   ├── EquityCurveChart  # Plotly equity curve
-│   │   ├── CalendarHeatmap   # Daily performance heatmap
-│   │   ├── TradesTable.vue   # Filtered trades table
-│   │   └── TradeChartModal   # Lightweight charts modal
-│   └── Common/
-│       ├── AppButton.vue     # Reusable action button
-│       ├── AppInput.vue      # Input with password eye toggle
-│       ├── AppBadge.vue      # Status & indicator badges
-│       ├── AppMetricCard.vue # KPI card with tooltip & deltas
-│       ├── AppModal.vue      # Backdrop blur modal
-│       ├── AppConfirmDeleteModal.vue # Double-confirmation modal
-│       ├── AppEmptyState.vue # Dashed empty state view
-│       ├── AppHeader.vue     # Workstation top navigation
-│       ├── AppSidebar.vue    # Collapsible sidebar with usage meter
-│       ├── AppAuthCard.vue   # Login/Registration form
-│       ├── AppPagination.vue # Pagination & page size selector
-│       ├── AppSkeleton.vue   # Anti-flicker loading skeleton
-│       └── AppTooltip.vue    # Acronym & definition tooltip
-├── pages/
-│   ├── index.vue             # Dashboard main
-│   ├── upload.vue            # File ingestion
-│   └── journal.vue           # Trading journal
-├── docs/
-│   ├── README.md             # This documentation file
-│   ├── CHANGELOG.md          # Version history
-│   ├── project-spec.md       # Project specification (SDD)
-│   └── tech-spec.md          # Technical specification (SDD)
-├── composables/
-│   ├── useAnalytics.ts       # Analytics composable
-│   └── useTradeComparison.ts # Comparison composable
-├── stores/
-│   └── analytics.ts          # Pinia store
-└── types/
-    ├── analytics.ts          # Core analytics types
-    └── analytics.extended.ts # Extended trade types
-```
-
-## Quick Start
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure Environment Variables
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-```
-NUXT_PUBLIC_API_BASE_URL=http://localhost:8000
-NUXT_PUBLIC_API_VERSION=v1
-```
-
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-Access the application at `http://localhost:3000`
-
----
-
-## 🧪 Testing and Build
-
-```bash
-# Typecheck
-npx nuxi typecheck
-
-# Production build
-npm run build
-```
+Product-wide decisions (microservices, MT5 EA bridge, two repos) are recorded in the backend repo
+`docs/adr/`.

@@ -1,5 +1,19 @@
 # Changelog - Trading Bot Frontend
 
+
+## [Unreleased]
+
+### Added
+- `AGENTS.md`, `.agents/rules/`, `.agents/templates/`: single source of rules for AI agents (replaces `.gemini/rules`).
+- `features/_template` feature module and `composables/useApiClient.ts` (envelope unwrap, `ApiError`).
+- `docs/`: architecture, features catalog, ADR 0001; `specs/`: workflow and drafts 001-004.
+
+### Removed
+- `docs/project-spec.md`, `docs/tech-spec.md` (folded into `docs/architecture.md` and `.agents/rules/`).
+- `TROUBLESHOOTING-DATOS.md` (obsolete debugging notes for the old data-loading issue).
+
+---
+
 ## [1.1.0] - Dub.co Design System & Reusable UI Component Library 🎨
 
 ### ✨ Features
