@@ -10,8 +10,8 @@ feature api/ file → useApiClient() → $fetch → gateway /api/v1/<service>/..
 - Base URL `${NUXT_PUBLIC_API_BASE_URL}/api/${NUXT_PUBLIC_API_VERSION}`.
 - Adds `Authorization: Bearer <token>` when logged in *(token source wired in spec 001)*.
 - Unwraps the success envelope and returns `data`.
-- Throws `ApiError(code, message, status, details)` for error envelopes; `NETWORK_ERROR` when the
-  server is unreachable.
+- Throws `ApiError(code, message, status, details)` for error envelopes; `HTTP_<status>` for non-envelope
+  errors; `NETWORK_ERROR` only when the server is unreachable (status 0).
 
 ## Backend contract (from `Trading-bot-backend/.agents/rules/api-contracts.md`)
 

@@ -38,7 +38,10 @@ const toApiError = (error: unknown): ApiError => {
   if (body?.code) {
     return new ApiError(body.code, body.message, status, body.details)
   }
-  return new ApiError('NETWORK_ERROR', 'The server could not be reached.', status)
+  if (status === 0) {
+    return new ApiError('NETWORK_ERROR', 'The server could not be reached.', status)
+  }
+  return new ApiError(`HTTP_${status}`, `Request failed with status ${status}.`, status)
 }
 
 export const useApiClient = () => {
