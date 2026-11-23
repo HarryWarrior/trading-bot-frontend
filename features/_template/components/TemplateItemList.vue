@@ -1,15 +1,3 @@
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import AppEmptyState from '~/components/Common/AppEmptyState.vue'
-import AppPagination from '~/components/Common/AppPagination.vue'
-import AppSkeleton from '~/components/Common/AppSkeleton.vue'
-import { useTemplateItems } from '../composables/useTemplateItems'
-
-const { items, pagination, loading, error, load } = useTemplateItems()
-
-onMounted(() => load())
-</script>
-
 <template>
   <section class="space-y-3">
     <div v-if="loading" class="space-y-2">
@@ -34,3 +22,15 @@ onMounted(() => load())
     </template>
   </section>
 </template>
+
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import AppEmptyState from '~/components/Common/AppEmptyState.vue'
+import AppPagination from '~/components/Common/AppPagination.vue'
+import AppSkeleton from '~/components/Common/AppSkeleton.vue'
+import { useTemplateItems } from '../composables/useTemplateItems'
+
+const { items, pagination, loading, error, load } = useTemplateItems()
+
+onMounted(() => load())
+</script>
