@@ -7,7 +7,7 @@ const ok = (data: unknown) => ({ success: true, data, message: 'ok', meta: { tim
 const tradeDto = {
   id: 't1', account_ref: 'upload', position_id: 'p1', symbol: 'EURUSD', side: 'buy', volume: 0.1,
   open_time: '2026-01-01T10:00:00Z', close_time: '2026-01-01T11:00:00Z', open_price: 1.1, close_price: 1.2,
-  stop_loss: null, take_profit: 1.3, commission: -0.5, swap: 0, profit: 10, net: 9.5, outcome: 'WIN',
+  stop_loss: null, take_profit: 1.3, commission: -0.5, swap: 0, profit: 10, net: 9.5, outcome: 'win',
   duration_minutes: 60, comment: null, source: 'upload', import_id: 'i1',
 }
 
@@ -21,7 +21,7 @@ describe('journal mappers', () => {
   it('maps a trade DTO to camelCase', () => {
     expect(toTrade(tradeDto as never)).toMatchObject({
       id: 't1', accountRef: 'upload', positionId: 'p1', openTime: '2026-01-01T10:00:00Z', stopLoss: null,
-      takeProfit: 1.3, durationMinutes: 60, importId: 'i1', net: 9.5, outcome: 'WIN',
+      takeProfit: 1.3, durationMinutes: 60, importId: 'i1', net: 9.5, outcome: 'win',
     })
   })
 
@@ -65,15 +65,15 @@ describe('journalApi', () => {
       items: [tradeDto],
       pagination: { page: 1, page_size: 20, total_items: 1, total_pages: 1, has_next: false, has_prev: false },
     }))
-    const page = await journalApi.listTrades({ symbol: 'EURUSD', outcome: 'WIN' })
+    const page = await journalApi.listTrades({ symbol: 'EURUSD', outcome: 'win' })
     expect(fetchMock.mock.calls[0][0]).toBe('/journal/trades')
-    expect(fetchMock.mock.calls[0][1].query).toEqual({ page: 1, page_size: 20, symbol: 'EURUSD', outcome: 'WIN' })
+    expect(fetchMock.mock.calls[0][1].query).toEqual({ page: 1, page_size: 20, symbol: 'EURUSD', outcome: 'win' })
     expect(page.items[0].accountRef).toBe('upload')
     expect(page.pagination.totalItems).toBe(1)
   })
 
   it('encodes the trade id in getTrade', async () => {
-    fetchMock.mockResolvedValue(ok(tradeDto))
+    fetchMock.mockResolvedValue(ok({ trade: tradeDto }))
     await journalApi.getTrade('a/b c')
     expect(fetchMock.mock.calls[0][0]).toBe('/journal/trades/a%2Fb%20c')
   })

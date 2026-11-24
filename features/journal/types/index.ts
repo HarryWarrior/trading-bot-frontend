@@ -1,11 +1,11 @@
-export type TradeOutcome = 'WIN' | 'LOSS' | 'BREAKEVEN'
+export type TradeOutcome = 'win' | 'loss' | 'breakeven'
 export type TradeSortBy = 'close_time' | 'open_time' | 'profit' | 'symbol'
 export type SortDir = 'asc' | 'desc'
 
 export interface Trade {
   id: string
   accountRef: string
-  positionId: string
+  positionId: string | null
   symbol: string
   side: string
   volume: number

@@ -6,9 +6,9 @@
         <span class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{{ t('journal.trades.outcome') }}</span>
         <select v-model="outcome" :class="controlClass" @change="applyNow">
           <option value="">{{ t('journal.trades.outcome_all') }}</option>
-          <option value="WIN">{{ t('journal.trades.win') }}</option>
-          <option value="LOSS">{{ t('journal.trades.loss') }}</option>
-          <option value="BREAKEVEN">{{ t('journal.trades.breakeven') }}</option>
+          <option value="win">{{ t('journal.trades.win') }}</option>
+          <option value="loss">{{ t('journal.trades.loss') }}</option>
+          <option value="breakeven">{{ t('journal.trades.breakeven') }}</option>
         </select>
       </label>
       <label class="block">

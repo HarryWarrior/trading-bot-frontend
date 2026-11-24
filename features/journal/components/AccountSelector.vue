@@ -40,6 +40,6 @@ const onChange = (event: Event) => {
 }
 
 onMounted(() => {
-  if (!accounts.value.length) store.load()
+  store.load()
 })
 </script>

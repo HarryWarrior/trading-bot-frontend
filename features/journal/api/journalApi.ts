@@ -6,7 +6,7 @@ import type { ImportResult, JournalAccount, JournalPagination, Trade, TradeOutco
 interface TradeDto {
   id: string
   account_ref: string
-  position_id: string
+  position_id: string | null
   symbol: string
   side: string
   volume: number
@@ -122,7 +122,7 @@ export const journalApi = {
   },
 
   async getTrade(id: string): Promise<Trade> {
-    return toTrade(await useApiClient().get<TradeDto>(`/journal/trades/${encodeURIComponent(id)}`))
+    return toTrade((await useApiClient().get<{ trade: TradeDto }>(`/journal/trades/${encodeURIComponent(id)}`)).trade)
   },
 
   async listAccounts(): Promise<JournalAccount[]> {

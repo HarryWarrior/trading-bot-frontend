@@ -32,9 +32,9 @@ describe('journal trades store', () => {
     api.listTrades.mockResolvedValue({ items: [], pagination })
     const store = useJournalTradesStore()
     await store.setPage(3)
-    await store.setFilters({ symbol: 'EURUSD', outcome: 'LOSS', accountRef: 'upload' })
+    await store.setFilters({ symbol: 'EURUSD', outcome: 'loss', accountRef: 'upload' })
     const query = api.listTrades.mock.calls.at(-1)![0]
-    expect(query).toMatchObject({ page: 1, symbol: 'EURUSD', outcome: 'LOSS', accountRef: 'upload' })
+    expect(query).toMatchObject({ page: 1, symbol: 'EURUSD', outcome: 'loss', accountRef: 'upload' })
     expect(store.hasFilters).toBe(true)
   })
 

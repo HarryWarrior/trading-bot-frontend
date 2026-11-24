@@ -5,7 +5,7 @@ import type { Trade } from '~/features/journal'
 const trade = (over: Partial<Trade>): Trade => ({
   id: 'a', accountRef: 'x', positionId: 'p', symbol: 'EURUSD', side: 'buy', volume: 1, openTime: '', closeTime: '',
   openPrice: 1, closePrice: 1.2, stopLoss: null, takeProfit: null, commission: 0, swap: 0, profit: 0, net: 10,
-  outcome: 'WIN', durationMinutes: 30, comment: null, source: 'upload', importId: null, ...over,
+  outcome: 'win', durationMinutes: 30, comment: null, source: 'upload', importId: null, ...over,
 })
 
 describe('trade comparison', () => {

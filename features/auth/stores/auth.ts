@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { setAuthHooks, type RefreshResult } from '~/composables/apiAuth'
 import { ApiError } from '~/composables/useApiClient'
+import { resetUserStores } from '~/composables/resetUserState'
 import { authApi } from '../api/authApi'
 import type { AuthSession, AuthUser } from '../types'
 
@@ -45,6 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const clear = () => {
+    resetUserStores()
     accessToken.value = null
     user.value = null
     writeRefresh(null)
@@ -56,7 +58,9 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
-      applySession(await authApi.signIn({ email, password }))
+      const session = await authApi.signIn({ email, password })
+      if (user.value && user.value.id !== session.user.id) resetUserStores()
+      applySession(session)
     } catch (err) {
       error.value = codeOf(err)
       throw err
