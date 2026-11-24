@@ -1,6 +1,6 @@
 # 001 — Real data only: login and feature modules (frontend design)
 
-- **Status:** approved (2026-11-23)
+- **Status:** done (2026-11-24)
 - **Date:** 2026-11-23
 - **Backend (source of truth):** `Trading-bot-backend/specs/001-service-migration/design.md`
 - **Branch:** `feat/001-real-data`

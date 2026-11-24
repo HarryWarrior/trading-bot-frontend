@@ -15,22 +15,22 @@ flowchart LR
   client --> gw[Backend gateway /api/v1/&lt;service&gt;]
 ```
 
-Features (planned): `auth`, `journal`, `analytics`, `mt5-connection`, `strategies`, `ai-journal`.
+Features: `auth`, `journal`, `analytics`, `mt5-connection`, `market` (active); `strategies`, `ai-journal` (planned).
 See [features-catalog.md](features-catalog.md).
 
-## Current state (legacy until frontend spec 001)
+## Current state
 
 | Item | Purpose |
 |---|---|
-| `pages/index.vue` | Landing / navigation |
-| `pages/upload.vue` | MT5 report upload (CSV/XLSX) |
-| `pages/journal.vue` | Dashboard: KPIs, equity curve, calendar heatmap, trades table, MT5 account switcher |
-| `stores/analytics.ts` | Analytics + trades + upload (calls `$fetch` directly) |
-| `stores/mt5.ts` | MT5 accounts (legacy backend `/api/v1/mt5`) |
+| `features/auth` | Sign-in/up, verify email, reset password; session store (access token in memory, refresh token in `localStorage`) |
+| `features/journal` | Trades list and filters, report upload, account selector |
+| `features/analytics` | Dashboard: KPIs, equity curve, calendar heatmap, symbols, hours, recent trades, trade chart and comparison |
+| `features/mt5-connection` | Link/sync/unlink the open MT5 terminal (admin); non-admins are pointed to upload |
+| `features/market` | Real candles for charts; "No market data" when the terminal is unavailable |
+| `pages/*.vue` | Thin route components composing features |
+| `middleware/auth.global.ts` | Every page except login/register/verify-email/forgot/reset-password requires a session |
 | `stores/i18n.ts`, `composables/useI18n.ts` | English/Spanish translations |
-| `composables/useTheme.ts` | Dark/light theme |
-| `composables/useTradeComparison.ts` | Multi-chart comparison state |
-| `components/Analytics/*` | KPI cards, charts (Plotly, Lightweight Charts), tables, modals |
+| `composables/useApiClient.ts` | Envelope unwrap, `ApiError`, auth header, refresh-once on `UNAUTHENTICATED` |
 
 ## Shared components (`components/Common/`)
 
@@ -39,17 +39,18 @@ See [features-catalog.md](features-catalog.md).
 | `AppButton` | Variants primary/secondary/danger/success/warning/subtle, sizes, loading |
 | `AppInput` | Label, hint, error; eye toggle for passwords |
 | `AppBadge` | Status pill (success/danger/warning/info/primary/neutral) |
-| `AppMetricCard` | KPI card with tooltip and delta badge |
+| `AppMetricCard` | KPI card with tooltip, delta badge and optional `valueClass` for sign colouring |
 | `AppModal` / `AppConfirmDeleteModal` | Dialog / typed double confirmation for deletes |
 | `AppEmptyState` | Empty view with CTA |
 | `AppPagination` | Page controls + page size; props `currentPage`, `pageSize`, `totalItems`; emits `change` |
 | `AppSkeleton` | Loading placeholder (`height`, `width`) |
 | `AppTooltip` | Metric definitions |
-| `AppHeader` / `AppSidebar` / `AppThemeToggle` / `AppAuthCard` | Shell, navigation, theme, auth |
+| `AppHeader` / `AppSidebar` / `AppThemeToggle` | Shell, navigation, theme |
 
 ## Configuration
 
 | Variable | Default |
 |---|---|
-| `NUXT_PUBLIC_API_BASE_URL` | `http://localhost:8000` |
+| `NUXT_PUBLIC_API_BASE_URL` | empty (same origin; the dev server proxies `/api/v1/<service>`) |
 | `NUXT_PUBLIC_API_VERSION` | `v1` |
+| `NUXT_AUTH_URL` / `NUXT_JOURNAL_URL` / `NUXT_ANALYTICS_URL` / `NUXT_MT5_URL` | dev proxy targets, default `http://localhost:8001` / `8002` / `8003` / `8004` |

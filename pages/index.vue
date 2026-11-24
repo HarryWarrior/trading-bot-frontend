@@ -13,9 +13,6 @@
           <span class="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
             TradingBot
           </span>
-          <AppBadge variant="neutral" size="xs">
-            v1.1
-          </AppBadge>
         </div>
       </div>
 
@@ -39,9 +36,9 @@
           </button>
         </div>
 
-        <NuxtLink to="/journal">
+        <NuxtLink :to="ctaTo">
           <AppButton variant="secondary" size="sm">
-            {{ t('nav.journal') }}
+            {{ auth.isAuthenticated ? t('nav.journal') : t('landing.login') }}
           </AppButton>
         </NuxtLink>
       </div>
@@ -59,35 +56,14 @@
       </h1>
 
       <p class="text-base sm:text-lg text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-        Ingest MT5 execution statements, audit real-time portfolio risk factors, model equity trajectories, and compare strategy execution with microsecond clarity.
+        Import your MT5 reports, review risk metrics, follow your equity curve, and compare your trades from your own trade history.
       </p>
 
       <!-- CTA Buttons -->
       <div class="flex items-center justify-center gap-3 pt-4 flex-wrap">
-        <NuxtLink to="/mt5">
+        <NuxtLink :to="ctaTo">
           <AppButton variant="primary" size="lg">
-            <template #startIcon>
-              <span>🔗</span>
-            </template>
-            {{ t('nav.connect_mt5') }}
-          </AppButton>
-        </NuxtLink>
-
-        <NuxtLink to="/journal">
-          <AppButton variant="secondary" size="lg">
-            <template #startIcon>
-              <span>📊</span>
-            </template>
-            {{ t('nav.journal') }}
-          </AppButton>
-        </NuxtLink>
-
-        <NuxtLink to="/upload">
-          <AppButton variant="subtle" size="lg">
-            <template #startIcon>
-              <span>📤</span>
-            </template>
-            {{ t('nav.upload') }}
+            {{ auth.isAuthenticated ? t('nav.journal') : t('landing.login') }}
           </AppButton>
         </NuxtLink>
       </div>
@@ -146,7 +122,7 @@
 
     <!-- Footer -->
     <footer class="relative z-10 max-w-6xl w-full mx-auto pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-400">
-      <div>© 2026 TradingBot Intelligence Inc. All rights reserved.</div>
+      <div>© 2026 TradingBot</div>
       <div class="flex items-center gap-4">
         <a href="#terms" class="hover:text-zinc-600 dark:hover:text-zinc-300">Terms</a>
         <a href="#privacy" class="hover:text-zinc-600 dark:hover:text-zinc-300">Privacy</a>
@@ -160,10 +136,13 @@
 <script setup lang="ts">
 import { useI18n } from '~/composables/useI18n'
 import AppButton from '~/components/Common/AppButton.vue'
-import AppBadge from '~/components/Common/AppBadge.vue'
+import { computed } from 'vue'
+import { useAuthStore } from '~/features/auth'
 import AppThemeToggle from '~/components/Common/AppThemeToggle.vue'
 
 const { t, locale, setLocale } = useI18n()
+const auth = useAuthStore()
+const ctaTo = computed(() => (auth.isAuthenticated ? '/journal' : '/login'))
 
 useHead({
   title: 'Trading Bot Analytics - Institutional Intelligence'

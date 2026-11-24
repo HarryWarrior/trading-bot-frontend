@@ -1,20 +1,17 @@
 # Testing
 
-## Today
+## Setup
 
-- `npm run build` must pass for every code change.
-- Manually verify each changed page in the browser: loading, empty, error and data states.
-
-## Target *(planned, frontend spec 001)*
-
-Vitest + `@nuxt/test-utils` + Vue Test Utils.
+Vitest (`npx vitest run`, config in `vitest.config.ts`, happy-dom) + Vue Test Utils. Tests live in `tests/unit/<feature>/`.
+Gates before every commit: `npx vitest run`, `npm run build`, `npx nuxi typecheck`.
 
 | What | How |
 |---|---|
-| `api/` mappers | Unit tests: DTO → view type, query params |
-| Stores | Unit tests with the api module mocked at its boundary |
+| `api/` mappers | Unit tests: DTO -> view type, query params (stub `$fetch` and `useRuntimeConfig`) |
+| Stores | Unit tests with the api module mocked at its boundary (`vi.mock`) |
 | Composables / formatters | Pure unit tests |
 | Components with logic | Mount tests: states (loading, empty, error, data) and emitted events |
+| No fake data | `tests/unit/no-random-data.spec.ts` guards against `Math.random` data |
 
 ```ts
 it('maps pagination from snake_case', () => {
@@ -26,5 +23,5 @@ it('maps pagination from snake_case', () => {
 ## Rules
 
 - Test behavior users see, not implementation details.
-- Every bug fix starts with a test reproducing it (once Vitest exists).
+- Every bug fix starts with a test reproducing it.
 - Never run `npm run build` while `npm run dev` is running.

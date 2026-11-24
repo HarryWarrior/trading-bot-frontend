@@ -15,6 +15,7 @@ export const useI18nStore = defineStore('i18n', () => {
       // General Navigation & Hero
       'app.title': 'Trading Bot Analytics',
       'app.subtitle': 'Professional portfolio intelligence and quantitative trade analytics',
+      'landing.login': 'Sign in',
       'nav.home': 'Home',
       'nav.journal': 'Trading Journal',
       'nav.upload': 'Upload Report',
@@ -207,6 +208,7 @@ export const useI18nStore = defineStore('i18n', () => {
       // General Navigation & Hero
       'app.title': 'Trading Bot Analytics',
       'app.subtitle': 'Inteligencia de portafolio profesional y análisis cuantitativo de trading',
+      'landing.login': 'Iniciar sesion',
       'nav.home': 'Inicio',
       'nav.journal': 'Journal de Trading',
       'nav.upload': 'Subir Reporte',
