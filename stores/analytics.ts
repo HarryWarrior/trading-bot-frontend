@@ -77,36 +77,6 @@ export const useAnalyticsStore = defineStore('analytics', () => {
         }
     }
 
-    const uploadTrades = async (file: File) => {
-        loading.value = true
-        error.value = null
-
-        try {
-            const config = useRuntimeConfig()
-            const baseURL = config.public.apiBaseUrl || 'http://localhost:8000'
-
-            const formData = new FormData()
-            formData.append('file', file)
-
-            const response = await $fetch(`${baseURL}/api/v1/analytics/upload-trades`, {
-                method: 'POST',
-                body: formData
-            })
-
-            // Refetch analytics and trades after upload
-            await fetchAnalytics()
-            await fetchTrades()
-
-            return response
-        } catch (err: any) {
-            error.value = err.message || 'Error al subir archivo'
-            console.error('Error uploading trades:', err)
-            throw err
-        } finally {
-            loading.value = false
-        }
-    }
-
     // Getters
     const sortedTrades = computed(() => {
         return [...trades.value].sort((a, b) =>
@@ -143,7 +113,6 @@ export const useAnalyticsStore = defineStore('analytics', () => {
 
         // Actions
         fetchAnalytics,
-        fetchTrades,
-        uploadTrades
+        fetchTrades
     }
 })

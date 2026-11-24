@@ -1,0 +1,13 @@
+/** Public surface of the feature. Other features and pages import only from here. */
+export { journalApi } from './api/journalApi'
+export { useJournalTrades, useJournalImport, useJournalAccounts } from './composables/useJournal'
+export { buildTradesQuery } from './composables/tradeQuery'
+export { uploadErrorKey, validateUploadFile } from './composables/uploadErrors'
+export { formatMoney, pnlClass } from './composables/format'
+export { useJournalTradesStore } from './stores/journalTrades'
+export { useJournalAccountsStore } from './stores/journalAccounts'
+export { useJournalImportStore } from './stores/journalImport'
+export { default as AccountSelector } from './components/AccountSelector.vue'
+export { default as UploadPanel } from './components/UploadPanel.vue'
+export { default as TradesPanel } from './components/TradesPanel.vue'
+export type { Trade, ImportResult, JournalAccount, TradeFilters, TradeQuery } from './types'

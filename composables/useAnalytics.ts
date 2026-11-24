@@ -34,7 +34,6 @@ export const useAnalytics = () => {
 
         // Actions
         fetchAnalytics: analyticsStore.fetchAnalytics,
-        fetchTrades: analyticsStore.fetchTrades,
-        uploadTrades: analyticsStore.uploadTrades
+        fetchTrades: analyticsStore.fetchTrades
     }
 }
