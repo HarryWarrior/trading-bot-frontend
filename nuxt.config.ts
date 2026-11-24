@@ -23,8 +23,18 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+            apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '',
             apiVersion: process.env.NUXT_PUBLIC_API_VERSION || 'v1'
+        }
+    },
+
+    // Same-origin in dev: the browser calls /api/v1/<service>/... and Nitro forwards to each service.
+    nitro: {
+        devProxy: {
+            '/api/v1/auth': { target: `${process.env.NUXT_AUTH_URL || 'http://localhost:8001'}/api/v1/auth`, changeOrigin: true },
+            '/api/v1/journal': { target: `${process.env.NUXT_JOURNAL_URL || 'http://localhost:8002'}/api/v1/journal`, changeOrigin: true },
+            '/api/v1/analytics': { target: `${process.env.NUXT_ANALYTICS_URL || 'http://localhost:8003'}/api/v1/analytics`, changeOrigin: true },
+            '/api/v1/mt5': { target: `${process.env.NUXT_MT5_URL || 'http://localhost:8004'}/api/v1/mt5`, changeOrigin: true }
         }
     },
 
