@@ -5,7 +5,12 @@
 export interface AuthHooks {
   /** Current in-memory access token, or null when signed out. */
   getAccessToken: () => string | null
-  /** Try to obtain a new access token. Resolves true when a retry is worthwhile. */
+  /**
+   * Try to obtain a new access token. Resolves true when a retry is worthwhile.
+   * `useApiClient` single-flights this (one call for any number of concurrent 401s), skips it when
+   * `getAccessToken()` already changed since the request was sent, and never uses it for the refresh
+   * endpoint itself (that call passes `skipAuthRefresh`; any 401 there triggers `onSessionExpired`).
+   */
   refresh: () => Promise<boolean>
   /** Called when the session cannot be recovered (refresh failed / retry still 401). */
   onSessionExpired: () => void

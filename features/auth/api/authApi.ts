@@ -55,7 +55,7 @@ export const authApi = {
   },
 
   async refresh(refreshToken: string): Promise<AuthSession> {
-    return toSession(await useApiClient().post<SessionDto>('/auth/refresh', { refresh_token: refreshToken }))
+    return toSession(await useApiClient().post<SessionDto>('/auth/refresh', { refresh_token: refreshToken }, { skipAuthRefresh: true }))
   },
 
   async signOut(refreshToken: string): Promise<void> {

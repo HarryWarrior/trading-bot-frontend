@@ -45,6 +45,25 @@ const toApiError = (error: unknown): ApiError => {
 
 type FetchOptions = NonNullable<Parameters<typeof $fetch>[1]>
 
+/** Shared by every client instance: concurrent 401s must trigger a single refresh (tokens rotate). */
+let inflightRefresh: Promise<boolean> | null = null
+
+const singleFlightRefresh = (refresh: () => Promise<boolean>): Promise<boolean> => {
+  if (!inflightRefresh) {
+    inflightRefresh = refresh()
+      .catch(() => false)
+      .finally(() => {
+        inflightRefresh = null
+      })
+  }
+  return inflightRefresh
+}
+
+interface CallOptions {
+  /** Set only by the refresh call itself: any 401 means the session is over, never refresh-and-retry. */
+  skipAuthRefresh?: boolean
+}
+
 export const useApiClient = () => {
   const config = useRuntimeConfig()
   const baseURL = `${config.public.apiBaseUrl}/api/${config.public.apiVersion}`
@@ -57,20 +76,21 @@ export const useApiClient = () => {
     return (envelope as SuccessEnvelope<T>).data
   }
 
-  const request = async <T>(path: string, options: FetchOptions = {}): Promise<T> => {
+  const request = async <T>(path: string, options: FetchOptions = {}, call: CallOptions = {}): Promise<T> => {
+    const hooks = getAuthHooks()
+    const sentToken = hooks?.getAccessToken() ?? null
     try {
       return await send<T>(path, options)
     } catch (first) {
       const error = toApiError(first)
-      const hooks = getAuthHooks()
-      if (error.code !== 'UNAUTHENTICATED' || !hooks) throw error
-      let refreshed = false
-      try {
-        refreshed = await hooks.refresh()
-      } catch {
-        refreshed = false
+      if (call.skipAuthRefresh) {
+        if (error.status === 401) hooks?.onSessionExpired()
+        throw error
       }
-      if (!refreshed) {
+      if (error.code !== 'UNAUTHENTICATED' || !hooks) throw error
+      // Another request may already have refreshed while this one was in flight: just retry.
+      const alreadyRefreshed = hooks.getAccessToken() !== sentToken
+      if (!alreadyRefreshed && !(await singleFlightRefresh(hooks.refresh))) {
         hooks.onSessionExpired()
         throw error
       }
@@ -84,16 +104,16 @@ export const useApiClient = () => {
     }
   }
 
-  type Extra = Pick<FetchOptions, 'headers'>
+  type Extra = Pick<FetchOptions, 'headers'> & CallOptions
   type Body = Record<string, unknown> | FormData
 
   return {
     get: <T>(path: string, query?: Record<string, unknown>, extra: Extra = {}) =>
-      request<T>(path, { ...extra, method: 'GET', query }),
-    post: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { ...extra, method: 'POST', body }),
-    put: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { ...extra, method: 'PUT', body }),
-    patch: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { ...extra, method: 'PATCH', body }),
+      request<T>(path, { headers: extra.headers, method: 'GET', query }, extra),
+    post: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { headers: extra.headers, method: 'POST', body }, extra),
+    put: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { headers: extra.headers, method: 'PUT', body }, extra),
+    patch: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { headers: extra.headers, method: 'PATCH', body }, extra),
     delete: <T>(path: string, query?: Record<string, unknown>, extra: Extra = {}) =>
-      request<T>(path, { ...extra, method: 'DELETE', query }),
+      request<T>(path, { headers: extra.headers, method: 'DELETE', query }, extra),
   }
 }

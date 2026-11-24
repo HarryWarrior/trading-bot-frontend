@@ -95,6 +95,7 @@ describe('useApiClient', () => {
     const form = new FormData()
     await api.post('/upload', form)
     expect(fetchMock.mock.calls[3][1].body).toBe(form)
+    expect(fetchMock.mock.calls[3][1].headers?.['Content-Type']).toBeUndefined()
   })
 
   it('merges caller headers with Authorization', async () => {
@@ -102,5 +103,49 @@ describe('useApiClient', () => {
     fetchMock.mockResolvedValue(ok(null))
     await useApiClient().post('/x', {}, { headers: { 'X-Foo': 'bar' } })
     expect(fetchMock.mock.calls[0][1].headers).toMatchObject({ 'X-Foo': 'bar', Authorization: 'Bearer tok' })
+  })
+
+  it('single-flights refresh: 3 parallel 401s trigger one refresh and all retry', async () => {
+    let token = 'old'
+    const refresh = vi.fn(async () => {
+      await Promise.resolve()
+      token = 'new'
+      return true
+    })
+    setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
+    fetchMock.mockImplementation(async (_path: string, options: { headers: Record<string, string> }) => {
+      if (options.headers.Authorization === 'Bearer new') return ok({ fine: true })
+      throw unauth()
+    })
+    const api = useApiClient()
+    const results = await Promise.all([api.get('/a'), api.get('/b'), api.get('/c')])
+    expect(results).toEqual([{ fine: true }, { fine: true }, { fine: true }])
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries without refreshing when another request already replaced the token', async () => {
+    let token = 'old'
+    const refresh = vi.fn(async () => true)
+    setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
+    fetchMock.mockImplementationOnce(async () => {
+      token = 'new' // a concurrent request refreshed while this one was in flight
+      throw unauth()
+    })
+    fetchMock.mockResolvedValueOnce(ok({ ok: 1 }))
+    expect(await useApiClient().get('/x')).toEqual({ ok: 1 })
+    expect(refresh).not.toHaveBeenCalled()
+    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe('Bearer new')
+  })
+
+  it('never runs the refresh-and-retry path for the refresh call itself', async () => {
+    const onSessionExpired = vi.fn()
+    const refresh = vi.fn(async () => true)
+    setAuthHooks({ getAccessToken: () => 'tok', refresh, onSessionExpired })
+    fetchMock.mockRejectedValue(unauth())
+    const err = await useApiClient().post('/auth/refresh', { refresh_token: 'r' }, { skipAuthRefresh: true }).catch((e) => e)
+    expect(err).toMatchObject({ code: 'UNAUTHENTICATED' })
+    expect(refresh).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(onSessionExpired).toHaveBeenCalledTimes(1)
   })
 })
