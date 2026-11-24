@@ -64,16 +64,14 @@
 
       <!-- CTA Buttons -->
       <div class="flex items-center justify-center gap-3 pt-4 flex-wrap">
-        <AppButton
-          variant="primary"
-          size="lg"
-          @click="showMt5Modal = true"
-        >
-          <template #startIcon>
-            <span>🔗</span>
-          </template>
-          {{ t('nav.connect_mt5') }}
-        </AppButton>
+        <NuxtLink to="/mt5">
+          <AppButton variant="primary" size="lg">
+            <template #startIcon>
+              <span>🔗</span>
+            </template>
+            {{ t('nav.connect_mt5') }}
+          </AppButton>
+        </NuxtLink>
 
         <NuxtLink to="/journal">
           <AppButton variant="secondary" size="lg">
@@ -156,25 +154,16 @@
       </div>
     </footer>
 
-    <!-- MT5 Connection Modal -->
-    <AnalyticsMt5ConnectModal
-      v-if="showMt5Modal"
-      @close="showMt5Modal = false"
-      @connected="navigateTo('/journal')"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useI18n } from '~/composables/useI18n'
 import AppButton from '~/components/Common/AppButton.vue'
 import AppBadge from '~/components/Common/AppBadge.vue'
 import AppThemeToggle from '~/components/Common/AppThemeToggle.vue'
-import AnalyticsMt5ConnectModal from '~/components/Analytics/Mt5ConnectModal.vue'
 
 const { t, locale, setLocale } = useI18n()
-const showMt5Modal = ref(false)
 
 useHead({
   title: 'Trading Bot Analytics - Institutional Intelligence'
