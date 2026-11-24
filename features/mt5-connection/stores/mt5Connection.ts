@@ -47,6 +47,7 @@ export const useMt5ConnectionStore = defineStore('mt5Connection', () => {
   }
 
   const link = async (): Promise<boolean> => {
+    if (linking.value) return false
     linking.value = true
     error.value = null
     linkedJustNow.value = null
@@ -64,6 +65,7 @@ export const useMt5ConnectionStore = defineStore('mt5Connection', () => {
   }
 
   const sync = async (id: string): Promise<boolean> => {
+    if (syncingId.value) return false
     syncingId.value = id
     error.value = null
     try {
@@ -72,6 +74,7 @@ export const useMt5ConnectionStore = defineStore('mt5Connection', () => {
       return true
     } catch (err) {
       error.value = codeOf(err)
+      await loadStatus(id) // never keep showing "Connected" + old balance after a failed sync
       return false
     } finally {
       syncingId.value = null
@@ -79,6 +82,7 @@ export const useMt5ConnectionStore = defineStore('mt5Connection', () => {
   }
 
   const unlink = async (id: string): Promise<boolean> => {
+    if (unlinkingId.value) return false
     unlinkingId.value = id
     error.value = null
     try {

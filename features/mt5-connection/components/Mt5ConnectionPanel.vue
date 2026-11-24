@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from '~/composables/useI18n'
 import { useAuthStore } from '~/features/auth'
 import { mt5ErrorKey } from '../composables/mt5Errors'
@@ -111,7 +111,6 @@ const confirmUnlink = async () => {
   toUnlink.value = null
 }
 
-onMounted(() => {
-  if (view.value === 'manage') void store.load()
-})
+// The auth user may hydrate after mount, so react to the resolved view instead of loading once on mount.
+watch(view, (v) => { if (v === 'manage') void store.load() }, { immediate: true })
 </script>
