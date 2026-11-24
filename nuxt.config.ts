@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     // Feature modules (see .agents/rules/architecture.md): components auto-registered without
     // path prefix, composables and stores auto-imported.
     components: [
+        { path: '~/components/Common', pathPrefix: false },
         { path: '~/components', pathPrefix: true },
         { path: '~/features', pattern: '*/components/**/*.vue', pathPrefix: false }
     ],

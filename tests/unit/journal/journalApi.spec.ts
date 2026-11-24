@@ -79,7 +79,8 @@ describe('journalApi', () => {
   })
 
   it('lists accounts', async () => {
-    fetchMock.mockResolvedValue(ok([{ account_ref: 'upload', trades: 2, first_trade_at: null, last_trade_at: null }]))
+    // Real backend shape: GET /journal/accounts returns { items: [...] } (checked against the running service).
+    fetchMock.mockResolvedValue(ok({ items: [{ account_ref: 'upload', trades: 2, first_trade_at: null, last_trade_at: null }] }))
     expect(await journalApi.listAccounts()).toEqual([{ accountRef: 'upload', trades: 2, firstTradeAt: null, lastTradeAt: null }])
   })
 })

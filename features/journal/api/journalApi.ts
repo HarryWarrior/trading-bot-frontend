@@ -126,7 +126,7 @@ export const journalApi = {
   },
 
   async listAccounts(): Promise<JournalAccount[]> {
-    const data = await useApiClient().get<AccountDto[]>('/journal/accounts')
-    return data.map(toAccount)
+    const data = await useApiClient().get<{ items: AccountDto[] }>('/journal/accounts')
+    return data.items.map(toAccount)
   },
 }
