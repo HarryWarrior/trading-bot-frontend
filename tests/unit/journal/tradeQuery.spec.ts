@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildTradesQuery } from '~/features/journal/composables/tradeQuery'
+import { buildTradesQuery, isInvalidDateRange } from '~/features/journal/composables/tradeQuery'
 import { formatMoney, pnlClass } from '~/features/journal/composables/format'
 
 describe('buildTradesQuery', () => {
@@ -17,7 +17,7 @@ describe('buildTradesQuery', () => {
         symbol: ' EURUSD ',
         outcome: 'WIN',
         dateFrom: '2026-01-01',
-        dateTo: '2026-02-01',
+        dateTo: '2026-01-31',
         profitMin: 0,
         profitMax: 100,
         accountRef: 'upload',
@@ -35,6 +35,31 @@ describe('buildTradesQuery', () => {
       profit_max: 100,
       account_ref: 'upload',
     })
+  })
+})
+
+describe('date_to is exclusive on the backend', () => {
+  const to = (d: string) => buildTradesQuery({ dateTo: d }).date_to
+  it('sends the day after the picked day', () => {
+    expect(to('2026-01-31')).toBe('2026-02-01')
+    expect(to('2026-12-31')).toBe('2027-01-01')
+    expect(to('2024-02-28')).toBe('2024-02-29')
+    expect(to('2024-02-29')).toBe('2024-03-01')
+    expect(to('2026-02-28')).toBe('2026-03-01')
+  })
+  it('keeps date_from inclusive', () => {
+    expect(buildTradesQuery({ dateFrom: '2026-01-01' }).date_from).toBe('2026-01-01')
+  })
+  it('detects from > to', () => {
+    expect(isInvalidDateRange('2026-02-01', '2026-01-31')).toBe(true)
+    expect(isInvalidDateRange('2026-01-31', '2026-01-31')).toBe(false)
+    expect(isInvalidDateRange('', '2026-01-31')).toBe(false)
+  })
+})
+
+describe('symbol', () => {
+  it('is trimmed and upper-cased', () => {
+    expect(buildTradesQuery({ symbol: ' eurusd ' }).symbol).toBe('EURUSD')
   })
 })
 

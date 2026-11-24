@@ -60,6 +60,17 @@ describe('journal trades store', () => {
     expect(store.trades).toEqual([])
   })
 
+  it('rejects from > to without a request and exposes the error', async () => {
+    api.listTrades.mockResolvedValue({ items: [], pagination })
+    const store = useJournalTradesStore()
+    await store.setFilters({ dateFrom: '2026-02-01', dateTo: '2026-01-01' })
+    expect(api.listTrades).not.toHaveBeenCalled()
+    expect(store.rangeError).toBe(true)
+    await store.setFilters({ dateTo: '2026-02-05' })
+    expect(store.rangeError).toBe(false)
+    expect(api.listTrades).toHaveBeenCalledTimes(1)
+  })
+
   it('resetFilters clears filters', async () => {
     api.listTrades.mockResolvedValue({ items: [], pagination })
     const store = useJournalTradesStore()
@@ -84,6 +95,27 @@ describe('journal import store', () => {
     expect(await store.upload(csv('r.pdf'))).toBe(false)
     expect(store.error).toBe('UNSUPPORTED_FILE')
     expect(api.uploadReport).not.toHaveBeenCalled()
+  })
+
+  it('refreshes accounts after a successful import, and trades only if already loaded', async () => {
+    api.uploadReport.mockResolvedValue({ id: 'i1', tradesCreated: 2, skippedRows: [] })
+    api.listAccounts.mockResolvedValue([])
+    api.listTrades.mockResolvedValue({ items: [], pagination })
+    const store = useJournalImportStore()
+    await store.upload(csv())
+    expect(api.listAccounts).toHaveBeenCalledTimes(1)
+    expect(api.listTrades).not.toHaveBeenCalled()
+    await useJournalTradesStore().load()
+    api.listTrades.mockClear()
+    api.uploadReport.mockResolvedValue({ id: 'i2', tradesCreated: 1, skippedRows: [] })
+    await store.upload(csv())
+    expect(api.listTrades).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not refresh on failure', async () => {
+    api.uploadReport.mockRejectedValue(new ApiError('DUPLICATE_IMPORT', 'dup', 409, {}))
+    await useJournalImportStore().upload(csv())
+    expect(api.listAccounts).not.toHaveBeenCalled()
   })
 
   it('keeps the duplicate import id from a 409', async () => {

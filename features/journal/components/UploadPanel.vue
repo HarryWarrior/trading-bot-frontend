@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="s in result.skippedRows" :key="s.row" class="border-t border-zinc-200 dark:border-zinc-800">
+              <tr v-for="(s, i) in result.skippedRows" :key="`${s.row}-${i}`" class="border-t border-zinc-200 dark:border-zinc-800">
                 <td class="px-3 py-1.5 font-mono">{{ s.row }}</td>
                 <td class="px-3 py-1.5">{{ s.reason }}</td>
               </tr>

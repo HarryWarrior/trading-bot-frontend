@@ -23,6 +23,8 @@
       <AppButton v-if="hasFilters" variant="secondary" size="sm" type="button" @click="clearAll">{{ t('journal.trades.clear') }}</AppButton>
     </form>
 
+    <p v-if="rangeError" class="text-xs text-red-500 font-medium" role="alert">{{ t('journal.trades.range_error') }}</p>
+
     <div v-if="loading && !loaded" class="space-y-2">
       <AppSkeleton v-for="n in 6" :key="n" height="h-10" />
     </div>
@@ -93,7 +95,7 @@ import type { TradeOutcome, TradeSortBy } from '../types'
 
 const { t } = useI18n()
 const {
-  trades, pagination, filters, page, pageSize, sortBy, sortDir, loading, error, loaded, hasFilters,
+  trades, pagination, filters, page, pageSize, sortBy, sortDir, loading, error, loaded, hasFilters, rangeError,
   load, setFilters, resetFilters, setPage, setPageSize, setSort,
 } = useJournalTrades()
 

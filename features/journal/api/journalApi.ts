@@ -122,7 +122,7 @@ export const journalApi = {
   },
 
   async getTrade(id: string): Promise<Trade> {
-    return toTrade(await useApiClient().get<TradeDto>(`/journal/trades/${id}`))
+    return toTrade(await useApiClient().get<TradeDto>(`/journal/trades/${encodeURIComponent(id)}`))
   },
 
   async listAccounts(): Promise<JournalAccount[]> {

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { ApiError } from '~/composables/useApiClient'
 import { journalApi } from '../api/journalApi'
+import { isInvalidDateRange } from '../composables/tradeQuery'
 import type { JournalPagination, SortDir, Trade, TradeFilters, TradeSortBy } from '../types'
 
 const emptyFilters = (): TradeFilters => ({
@@ -33,7 +34,10 @@ export const useJournalTradesStore = defineStore('journalTrades', () => {
     return !!(f.q || f.symbol || f.outcome || f.dateFrom || f.dateTo || f.accountRef)
   })
 
+  const rangeError = computed(() => isInvalidDateRange(filters.value.dateFrom, filters.value.dateTo))
+
   const load = async () => {
+    if (rangeError.value) return
     const id = ++requestId
     loading.value = true
     error.value = null
@@ -92,7 +96,7 @@ export const useJournalTradesStore = defineStore('journalTrades', () => {
   }
 
   return {
-    trades, pagination, filters, page, pageSize, sortBy, sortDir, loading, error, loaded, hasFilters,
+    trades, pagination, filters, page, pageSize, sortBy, sortDir, loading, error, loaded, hasFilters, rangeError,
     load, setFilters, resetFilters, setPage, setPageSize, setSort,
   }
 })

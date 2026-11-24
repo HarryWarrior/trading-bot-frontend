@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { ApiError } from '~/composables/useApiClient'
 import { journalApi } from '../api/journalApi'
 import { validateUploadFile } from '../composables/uploadErrors'
+import { useJournalAccountsStore } from './journalAccounts'
+import { useJournalTradesStore } from './journalTrades'
 import type { ImportResult } from '../types'
 
 export const useJournalImportStore = defineStore('journalImport', () => {
@@ -32,6 +34,10 @@ export const useJournalImportStore = defineStore('journalImport', () => {
     loading.value = true
     try {
       result.value = await journalApi.uploadReport(file)
+      // New data: refresh the account list (and trade counts) and any trades already on screen.
+      const trades = useJournalTradesStore()
+      void useJournalAccountsStore().load()
+      if (trades.loaded) void trades.load()
       return true
     } catch (err) {
       if (err instanceof ApiError) {
