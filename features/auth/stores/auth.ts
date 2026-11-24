@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { setAuthHooks } from '~/composables/apiAuth'
+import { setAuthHooks, type RefreshResult } from '~/composables/apiAuth'
 import { ApiError } from '~/composables/useApiClient'
 import { authApi } from '../api/authApi'
 import type { AuthSession, AuthUser } from '../types'
@@ -35,7 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'admin')
 
-  let inflightRefresh: Promise<boolean> | null = null
+  let inflightRefresh: Promise<RefreshResult> | null = null
   let restoring: Promise<void> | null = null
 
   const applySession = (session: AuthSession) => {
@@ -65,18 +65,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const refresh = (): Promise<boolean> => {
+  const refresh = (): Promise<RefreshResult> => {
     if (inflightRefresh) return inflightRefresh
     const stored = readRefresh()
-    if (!stored) return Promise.resolve(false)
+    if (!stored) return Promise.resolve('expired')
     inflightRefresh = (async () => {
       try {
         applySession(await authApi.refresh(stored))
-        return true
+        return 'ok'
       } catch (err) {
-        // An unreachable server is not a verdict on the session: keep the token for the next try.
-        if (!(err instanceof ApiError && err.code === 'NETWORK_ERROR')) clear()
-        return false
+        // An unreachable server is not a verdict on the session: keep token and state for the next try.
+        if (err instanceof ApiError && (err.code === 'NETWORK_ERROR' || err.status === 0 || err.status >= 500)) {
+          return 'unavailable'
+        }
+        clear()
+        return 'expired'
       } finally {
         inflightRefresh = null
       }
@@ -85,9 +88,20 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const signOut = async () => {
-    const stored = readRefresh()
+    // The refresh token in the body is the credential. If the access token expired the call 401s;
+    // refresh (rotating the stored token), re-read it and retry once. Always clear locally.
     try {
-      if (stored && accessToken.value) await authApi.signOut(stored)
+      const stored = readRefresh()
+      if (stored) {
+        try {
+          await authApi.signOut(stored)
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 401 && (await refresh()) === 'ok') {
+            const rotated = readRefresh()
+            if (rotated) await authApi.signOut(rotated)
+          }
+        }
+      }
     } catch {
       /* the local session is dropped regardless */
     }
@@ -99,7 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (restoring) return restoring
     restoring = (async () => {
       try {
-        if (readRefresh() && (await refresh())) {
+        if (readRefresh() && (await refresh()) === 'ok') {
           try {
             user.value = await authApi.me()
           } catch {

@@ -70,22 +70,22 @@ describe('auth store', () => {
     localStorage.setItem('tb.refresh', 'ref1')
     api.refresh.mockResolvedValue(session('acc2', 'ref2'))
     const store = useAuthStore()
-    expect(await store.refresh()).toBe(true)
+    expect(await store.refresh()).toBe('ok')
     expect(api.refresh).toHaveBeenCalledWith('ref1')
     expect(localStorage.getItem('tb.refresh')).toBe('ref2')
     expect(store.accessToken).toBe('acc2')
   })
 
   it('refresh without a stored token resolves false', async () => {
-    expect(await useAuthStore().refresh()).toBe(false)
+    expect(await useAuthStore().refresh()).toBe('expired')
     expect(api.refresh).not.toHaveBeenCalled()
   })
 
-  it('a rejected refresh clears the session', async () => {
+  it('a rejected refresh (401) clears the session', async () => {
     localStorage.setItem('tb.refresh', 'bad')
     api.refresh.mockRejectedValue(new ApiError('INVALID_TOKEN', 'x', 401))
     const store = useAuthStore()
-    expect(await store.refresh()).toBe(false)
+    expect(await store.refresh()).toBe('expired')
     expect(localStorage.getItem('tb.refresh')).toBeNull()
     expect(store.accessToken).toBeNull()
   })
@@ -93,7 +93,7 @@ describe('auth store', () => {
   it('a network failure during refresh keeps the stored token', async () => {
     localStorage.setItem('tb.refresh', 'ref1')
     api.refresh.mockRejectedValue(new ApiError('NETWORK_ERROR', 'x', 0))
-    expect(await useAuthStore().refresh()).toBe(false)
+    expect(await useAuthStore().refresh()).toBe('unavailable')
     expect(localStorage.getItem('tb.refresh')).toBe('ref1')
   })
 
@@ -155,5 +155,43 @@ describe('auth store', () => {
     expect(store.accessToken).toBeNull()
     expect(localStorage.getItem('tb.refresh')).toBeNull()
     expect(onExpired).toHaveBeenCalled()
+  })
+
+  it('keeps the session and refresh token when refresh fails on the network mid-session, even through the hooks', async () => {
+    api.signIn.mockResolvedValue(session('acc1', 'ref1'))
+    api.refresh.mockRejectedValue(new ApiError('NETWORK_ERROR', 'x', 0))
+    const onExpired = vi.fn()
+    const store = useAuthStore()
+    store.registerHooks(onExpired)
+    await store.signIn('a@b.com', 'secret123')
+    expect(await getAuthHooks()?.refresh()).toBe('unavailable')
+    expect(localStorage.getItem('tb.refresh')).toBe('ref1')
+    expect(store.isAuthenticated).toBe(true)
+    expect(onExpired).not.toHaveBeenCalled()
+  })
+
+  it('signOut retries once with the rotated refresh token when the access token expired', async () => {
+    api.signIn.mockResolvedValue(session('acc1', 'ref1'))
+    api.signOut.mockRejectedValueOnce(new ApiError('UNAUTHENTICATED', 'expired', 401)).mockResolvedValueOnce(undefined)
+    api.refresh.mockResolvedValue(session('acc2', 'ref2'))
+    const store = useAuthStore()
+    await store.signIn('a@b.com', 'secret123')
+    await store.signOut()
+    expect(api.signOut).toHaveBeenNthCalledWith(1, 'ref1')
+    expect(api.signOut).toHaveBeenNthCalledWith(2, 'ref2')
+    expect(store.accessToken).toBeNull()
+    expect(localStorage.getItem('tb.refresh')).toBeNull()
+  })
+
+  it('signOut clears locally even if the retry also fails', async () => {
+    api.signIn.mockResolvedValue(session('acc1', 'ref1'))
+    api.signOut.mockRejectedValue(new ApiError('UNAUTHENTICATED', 'expired', 401))
+    api.refresh.mockResolvedValue(session('acc2', 'ref2'))
+    const store = useAuthStore()
+    await store.signIn('a@b.com', 'secret123')
+    await store.signOut()
+    expect(api.signOut).toHaveBeenCalledTimes(2)
+    expect(store.isAuthenticated).toBe(false)
+    expect(localStorage.getItem('tb.refresh')).toBeNull()
   })
 })

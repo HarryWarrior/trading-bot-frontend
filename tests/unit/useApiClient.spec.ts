@@ -49,7 +49,7 @@ describe('useApiClient', () => {
 
   it('refreshes once on 401 and retries with the new token', async () => {
     let token = 'old'
-    const refresh = vi.fn(async () => { token = 'new'; return true })
+    const refresh = vi.fn(async () => { token = 'new'; return 'ok' as const })
     setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
     fetchMock.mockRejectedValueOnce(unauth()).mockResolvedValueOnce(ok({ a: 1 }))
     expect(await useApiClient().get('/x')).toEqual({ a: 1 })
@@ -60,7 +60,7 @@ describe('useApiClient', () => {
 
   it('calls onSessionExpired when refresh fails and does not loop', async () => {
     const onSessionExpired = vi.fn()
-    setAuthHooks({ getAccessToken: () => 'old', refresh: vi.fn(async () => false), onSessionExpired })
+    setAuthHooks({ getAccessToken: () => 'old', refresh: vi.fn(async () => 'expired' as const), onSessionExpired })
     fetchMock.mockRejectedValue(unauth())
     const err = await useApiClient().get('/x').catch((e) => e)
     expect(err).toMatchObject({ code: 'UNAUTHENTICATED' })
@@ -70,7 +70,7 @@ describe('useApiClient', () => {
 
   it('expires the session if the retry is still 401', async () => {
     const onSessionExpired = vi.fn()
-    const refresh = vi.fn(async () => true)
+    const refresh = vi.fn(async () => 'ok' as const)
     setAuthHooks({ getAccessToken: () => 't', refresh, onSessionExpired })
     fetchMock.mockRejectedValue(unauth())
     await expect(useApiClient().get('/x')).rejects.toMatchObject({ code: 'UNAUTHENTICATED' })
@@ -110,7 +110,7 @@ describe('useApiClient', () => {
     const refresh = vi.fn(async () => {
       await Promise.resolve()
       token = 'new'
-      return true
+      return 'ok' as const
     })
     setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
     fetchMock.mockImplementation(async (_path: string, options: { headers: Record<string, string> }) => {
@@ -125,7 +125,7 @@ describe('useApiClient', () => {
 
   it('retries without refreshing when another request already replaced the token', async () => {
     let token = 'old'
-    const refresh = vi.fn(async () => true)
+    const refresh = vi.fn(async () => 'ok' as const)
     setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
     fetchMock.mockImplementationOnce(async () => {
       token = 'new' // a concurrent request refreshed while this one was in flight
@@ -139,13 +139,33 @@ describe('useApiClient', () => {
 
   it('never runs the refresh-and-retry path for the refresh call itself', async () => {
     const onSessionExpired = vi.fn()
-    const refresh = vi.fn(async () => true)
+    const refresh = vi.fn(async () => 'ok' as const)
     setAuthHooks({ getAccessToken: () => 'tok', refresh, onSessionExpired })
     fetchMock.mockRejectedValue(unauth())
-    const err = await useApiClient().post('/auth/refresh', { refresh_token: 'r' }, { skipAuthRefresh: true }).catch((e) => e)
+    const err = await useApiClient().post('/auth/refresh', { refresh_token: 'r' }, { skipAuthRefresh: true, sessionEndsOn401: true }).catch((e) => e)
     expect(err).toMatchObject({ code: 'UNAUTHENTICATED' })
     expect(refresh).not.toHaveBeenCalled()
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(onSessionExpired).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not expire the session nor refresh again when refresh is unavailable (network)', async () => {
+    const onSessionExpired = vi.fn()
+    setAuthHooks({ getAccessToken: () => 'old', refresh: vi.fn(async () => 'unavailable' as const), onSessionExpired })
+    fetchMock.mockRejectedValue(unauth())
+    const err = await useApiClient().get('/x').catch((e) => e)
+    expect(err).toMatchObject({ code: 'NETWORK_ERROR' })
+    expect(onSessionExpired).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('skipAuthRefresh alone neither refreshes nor expires the session on 401', async () => {
+    const onSessionExpired = vi.fn()
+    const refresh = vi.fn(async () => 'ok' as const)
+    setAuthHooks({ getAccessToken: () => 'tok', refresh, onSessionExpired })
+    fetchMock.mockRejectedValue(unauth())
+    await expect(useApiClient().post('/x', {}, { skipAuthRefresh: true })).rejects.toMatchObject({ code: 'UNAUTHENTICATED' })
+    expect(refresh).not.toHaveBeenCalled()
+    expect(onSessionExpired).not.toHaveBeenCalled()
   })
 })
