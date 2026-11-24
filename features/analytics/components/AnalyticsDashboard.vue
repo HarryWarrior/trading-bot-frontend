@@ -4,7 +4,8 @@
       <AccountSelector :model-value="accountRef" :label="t('journal.accounts.label')" @update:model-value="onAccount" />
     </div>
 
-    <div v-if="loading && !loaded" class="space-y-4">
+    <!-- Any in-flight load (first, retry, account switch) hides the previous numbers. -->
+    <div v-if="loading" class="space-y-4" aria-busy="true">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <AppSkeleton v-for="n in 8" :key="n" height="h-28" />
       </div>
@@ -74,7 +75,7 @@ import RecentTrades from './RecentTrades.vue'
 const { t } = useI18n()
 const store = useAnalyticsDashboardStore()
 const recent = useRecentTradesStore()
-const { summary, equity, daily, bySymbol, hourly, loading, loaded, error, isEmpty } = storeToRefs(store)
+const { summary, equity, daily, bySymbol, hourly, loading, error, isEmpty } = storeToRefs(store)
 const accountRef = ref<string | null>(null)
 
 const errorMessage = computed(() => {

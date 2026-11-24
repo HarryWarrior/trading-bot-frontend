@@ -7,6 +7,7 @@
       :value="kpi.value"
       :subtitle="subtitle(kpi)"
       :tooltip="t(kpi.tooltipKey)"
+      :value-class="toneClass(kpi.tone)"
     >
       <template #badge>
         <span :class="toneClass(kpi.tone)" class="text-xs font-semibold">{{ kpi.tone === 'positive' ? '▲' : kpi.tone === 'negative' ? '▼' : '' }}</span>

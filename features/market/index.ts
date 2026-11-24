@@ -1,4 +1,5 @@
 export { marketApi } from './api/marketApi'
 export { useCandles } from './composables/useCandles'
 export { marketErrorKey } from './composables/marketErrors'
+export { candleContaining, isWithinCandles } from './composables/candleRange'
 export type { Candle, Rates, Timeframe } from './types'

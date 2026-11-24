@@ -38,7 +38,7 @@
 
     <!-- Value Display & Subtitle -->
     <div class="flex items-baseline justify-between">
-      <div class="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 font-mono">
+      <div class="text-2xl sm:text-3xl font-semibold tracking-tight font-mono" :class="valueClass || 'text-zinc-900 dark:text-zinc-50'">
         {{ value }}
       </div>
       <div v-if="subtitle" class="text-xs text-zinc-400 dark:text-zinc-500">
@@ -65,8 +65,11 @@ const props = withDefaults(defineProps<{
   isPositive?: boolean
   tooltip?: string
   subtitle?: string
+  /** Overrides the value text colour (e.g. green/red by sign). */
+  valueClass?: string
 }>(), {
   tooltip: '',
+  valueClass: '',
   subtitle: ''
 })
 
