@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { mt5Messages } from '~/features/mt5-connection/composables/messages'
+import { analyticsMessages } from '~/features/analytics/composables/messages'
 
 export type Locale = 'en' | 'es'
 
@@ -8,6 +10,8 @@ export const useI18nStore = defineStore('i18n', () => {
 
   const translations: Record<Locale, Record<string, string>> = {
     en: {
+      ...mt5Messages.en,
+      ...analyticsMessages.en,
       // General Navigation & Hero
       'app.title': 'Trading Bot Analytics',
       'app.subtitle': 'Professional portfolio intelligence and quantitative trade analytics',
@@ -198,6 +202,8 @@ export const useI18nStore = defineStore('i18n', () => {
       'status.break_even': 'BREAK EVEN',
     },
     es: {
+      ...mt5Messages.es,
+      ...analyticsMessages.es,
       // General Navigation & Hero
       'app.title': 'Trading Bot Analytics',
       'app.subtitle': 'Inteligencia de portafolio profesional y análisis cuantitativo de trading',
