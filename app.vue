@@ -1,6 +1,8 @@
 <template>
   <div class="min-h-screen bg-background text-foreground dark:bg-background-dark dark:text-foreground-dark font-sans antialiased selection:bg-zinc-900 selection:text-white dark:selection:bg-zinc-100 dark:selection:text-zinc-900">
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
 
@@ -21,5 +23,3 @@ useHead({
   ]
 })
 </script>
-
-

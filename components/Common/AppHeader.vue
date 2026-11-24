@@ -70,9 +70,37 @@
         {{ currentLocale.toUpperCase() }}
       </button>
 
-      <!-- User Avatar -->
-      <div class="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-semibold ring-1 ring-zinc-200 dark:ring-zinc-700 cursor-pointer shadow-subtle">
-        {{ userInitials }}
+      <!-- User Menu -->
+      <div class="relative">
+        <button
+          type="button"
+          class="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-semibold ring-1 ring-zinc-200 dark:ring-zinc-700 cursor-pointer shadow-subtle"
+          :aria-label="userName || 'User menu'"
+          @click="isUserMenuOpen = !isUserMenuOpen"
+        >
+          {{ userInitials }}
+        </button>
+        <div
+          v-if="isUserMenuOpen"
+          class="absolute right-0 mt-2 w-60 p-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-dropdown z-50"
+        >
+          <div class="px-2.5 py-2 space-y-1">
+            <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{{ userName }}</p>
+            <span
+              v-if="userRole"
+              class="inline-block text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700"
+            >
+              {{ userRole }}
+            </span>
+          </div>
+          <button
+            type="button"
+            class="w-full text-left px-2.5 py-2 text-xs font-medium rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+            @click="isUserMenuOpen = false; $emit('sign-out')"
+          >
+            {{ t('auth.sign_out') }}
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -88,18 +116,24 @@ const props = withDefaults(defineProps<{
   workspaceName?: string
   planBadge?: string
   userInitials?: string
+  userName?: string
+  userRole?: string
 }>(), {
   workspaceName: "Trading Bot HQ",
   planBadge: "PRO",
-  userInitials: "HB"
+  userInitials: "?",
+  userName: "",
+  userRole: ""
 })
 
 defineEmits<{
   (e: 'open-search'): void
+  (e: 'sign-out'): void
 }>()
 
-const { locale: currentLocale, setLocale } = useI18n()
+const { locale: currentLocale, setLocale, t } = useI18n()
 const isWorkspaceMenuOpen = ref(false)
+const isUserMenuOpen = ref(false)
 
 const toggleLanguage = () => {
   const next = currentLocale.value === 'en' ? 'es' : 'en'

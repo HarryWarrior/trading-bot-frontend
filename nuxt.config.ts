@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-11-01',
+    // Sessions live in the browser (memory + localStorage); no server rendering of auth-dependent UI.
+    ssr: false,
     devtools: { enabled: true },
 
     modules: [
