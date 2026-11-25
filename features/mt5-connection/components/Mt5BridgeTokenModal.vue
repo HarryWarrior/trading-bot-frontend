@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { Check, Copy } from 'lucide-vue-next'
 import { useI18n } from '~/composables/useI18n'
 import { useMt5Bridge } from '../composables/useMt5Bridge'
@@ -59,4 +59,7 @@ const copy = async () => {
 
 // Closing (button, Escape or the X) drops the plaintext for good: it is shown only once.
 const close = () => dismissCreatedToken()
+
+// Navigating away with the modal open also drops the plaintext (it must never be re-shown).
+onBeforeUnmount(() => dismissCreatedToken())
 </script>

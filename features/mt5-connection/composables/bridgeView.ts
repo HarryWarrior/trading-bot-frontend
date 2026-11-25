@@ -18,11 +18,17 @@ export const bridgeErrorKey = (code: string | null | undefined): string =>
  * origin, or the app origin when the API is same-origin (dev proxy / gateway).
  */
 export const resolveBridgeApiUrl = (apiBaseUrl: string, appOrigin: string): string => {
-  if (!apiBaseUrl) return appOrigin
+  const base = apiBaseUrl.trim()
+  if (!base) return appOrigin
   try {
-    return new URL(apiBaseUrl).origin
+    return new URL(base).origin
   } catch {
-    return apiBaseUrl.replace(/\/+$/, '')
+    // A relative base ("/backend") lives on the app origin.
+    try {
+      return new URL(base, appOrigin).origin
+    } catch {
+      return appOrigin || base.replace(/\/+$/, '')
+    }
   }
 }
 

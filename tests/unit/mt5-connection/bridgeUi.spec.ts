@@ -29,6 +29,10 @@ describe('bridge view helpers', () => {
     expect(resolveBridgeApiUrl('', 'http://localhost:3000')).toBe('http://localhost:3000')
     expect(resolveBridgeApiUrl('https://api.example.com/', 'http://localhost:3000')).toBe('https://api.example.com')
     expect(resolveBridgeApiUrl('https://api.example.com/base', 'x')).toBe('https://api.example.com')
+    expect(resolveBridgeApiUrl('/backend', 'http://localhost:3000')).toBe('http://localhost:3000')
+    expect(resolveBridgeApiUrl('/backend/', 'http://localhost:3000/')).toBe('http://localhost:3000')
+    expect(resolveBridgeApiUrl('http://localhost:8005/', 'http://localhost:3000')).toBe('http://localhost:8005')
+    expect(resolveBridgeApiUrl('  ', 'http://localhost:3000')).toBe('http://localhost:3000')
   })
   it('maps every known error code to a key in en and es, with a generic fallback', () => {
     expect(BRIDGE_ERROR_CODES).toEqual(expect.arrayContaining(['INVALID_TOKEN_NAME', 'NOT_FOUND', 'NETWORK_ERROR', 'UNAUTHENTICATED']))
@@ -71,6 +75,8 @@ describe('bridge components (source level: .vue is not mounted in this vitest co
     expect(modal).toContain('<AppModal')
     expect(modal).toContain('navigator.clipboard')
     expect(modal).toContain('dismissCreatedToken')
+    // navigating away with the modal open must not leave the plaintext in the store
+    expect(modal).toMatch(/onBeforeUnmount\(\(\) => dismissCreatedToken\(\)\)/)
     expect(modal).toContain(':close-on-backdrop="false"')
   })
   it('EA download shows an explicit unavailable state', () => {

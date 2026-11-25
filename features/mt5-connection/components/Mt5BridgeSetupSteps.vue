@@ -12,6 +12,7 @@
           class="select-all rounded-md border border-zinc-200 dark:border-zinc-700/60 bg-zinc-50 dark:bg-zinc-900 px-2 py-1 font-mono text-xs text-zinc-900 dark:text-zinc-100"
         >{{ apiUrl }}</code>
       </div>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ t('mt5b.setup.whitelist_note') }}</p>
     </li>
     <li>{{ t('mt5b.setup.step_attach') }}</li>
     <li>{{ t('mt5b.setup.step_inputs') }}</li>

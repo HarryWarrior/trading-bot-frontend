@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### Changed
+- mt5-connection: the ingest token is dropped from the store when the copy modal unmounts; the whitelist URL helper handles a relative `NUXT_PUBLIC_API_BASE_URL` and the setup steps note that the dev proxy shows the web app origin (the bridge origin, e.g. `http://localhost:8005`, also works).
 - Frontend runs on the real services (auth, journal, analytics, mt5) through the dev proxy; real data only, no simulated trades, balances or candles.
 - Pages are thin and compose `features/auth`, `journal`, `analytics`, `mt5-connection`, `market`; a global route guard requires a session.
 - Analytics dashboard shows a loading state on retry and account switch; KPI money values are coloured by sign; the trade chart shows "No market data" when the trade is outside the loaded candles.
