@@ -25,12 +25,12 @@ See [features-catalog.md](features-catalog.md).
 | `features/auth` | Sign-in/up, verify email, reset password; session store (access token in memory, refresh token in `localStorage`) |
 | `features/journal` | Trades list and filters, report upload, account selector |
 | `features/analytics` | Dashboard: KPIs, equity curve, calendar heatmap, symbols, hours, recent trades, trade chart and comparison |
-| `features/mt5-connection` | Link/sync/unlink the open MT5 terminal (admin); non-admins are pointed to upload |
+| `features/mt5-connection` | EA bridge for all users (`api/bridge.ts` → `mt5-bridge`): ingest tokens, EA download, setup guide, bridge accounts; legacy admin-only link/sync/unlink of the open MT5 terminal (`api/mt5Api.ts` → `mt5`) |
 | `features/market` | Real candles for charts; "No market data" when the terminal is unavailable |
 | `pages/*.vue` | Thin route components composing features |
 | `middleware/auth.global.ts` | Every page except login/register/verify-email/forgot/reset-password requires a session |
 | `stores/i18n.ts`, `composables/useI18n.ts` | English/Spanish translations |
-| `composables/useApiClient.ts` | Envelope unwrap, `ApiError`, auth header, refresh-once on `UNAUTHENTICATED` |
+| `composables/useApiClient.ts` | Envelope unwrap, `ApiError`, auth header, refresh-once on `UNAUTHENTICATED`; `getBlob` for authenticated binary downloads |
 
 ## Shared components (`components/Common/`)
 
@@ -54,3 +54,4 @@ See [features-catalog.md](features-catalog.md).
 | `NUXT_PUBLIC_API_BASE_URL` | empty (same origin; the dev server proxies `/api/v1/<service>`) |
 | `NUXT_PUBLIC_API_VERSION` | `v1` |
 | `NUXT_AUTH_URL` / `NUXT_JOURNAL_URL` / `NUXT_ANALYTICS_URL` / `NUXT_MT5_URL` | dev proxy targets, default `http://localhost:8001` / `8002` / `8003` / `8004` |
+| `NUXT_BRIDGE_URL` | dev proxy target of `mt5-bridge` (`/api/v1/mt5-bridge`), default `http://localhost:8005` |

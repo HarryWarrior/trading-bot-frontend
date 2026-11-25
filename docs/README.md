@@ -21,5 +21,6 @@ Product-wide decisions (microservices, MT5 EA bridge, two repos) are recorded in
 | `NUXT_PUBLIC_API_BASE_URL` | empty | API origin; empty uses the same origin (dev proxy) |
 | `NUXT_PUBLIC_API_VERSION` | `v1` | API version prefix |
 | `NUXT_AUTH_URL`, `NUXT_JOURNAL_URL`, `NUXT_ANALYTICS_URL`, `NUXT_MT5_URL` | `http://localhost:8001` .. `8004` | Dev proxy targets |
+| `NUXT_BRIDGE_URL` | `http://localhost:8005` | Dev proxy target of the `mt5-bridge` service (`/api/v1/mt5-bridge`) |
 
 Run: `npm install`, `npm run dev`; test: `npx vitest run`; check: `npm run build`, `npx nuxi typecheck`.

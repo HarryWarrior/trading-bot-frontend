@@ -40,4 +40,6 @@ export const journalApi = {
   Never parse messages.
 - Pagination params always `page`, `page_size`, `sort_by`, `sort_dir`, `q`.
 - No retries or caching in api files unless a spec asks for it.
+- Binary downloads use `useApiClient().getBlob(path)` (auth header, refresh-on-401, JSON error envelope read
+  back from the blob into `ApiError`); saving the file to disk happens in the feature's composable.
 - Legacy stores (`stores/analytics.ts`, `stores/mt5.ts`) still call `$fetch` directly; migrated in spec 001.

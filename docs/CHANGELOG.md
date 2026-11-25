@@ -4,6 +4,7 @@
 ## [Unreleased]
 
 ### Changed
+- mt5-connection: the ingest token is dropped from the store when the copy modal unmounts; the whitelist URL helper handles a relative `NUXT_PUBLIC_API_BASE_URL` and the setup steps note that the dev proxy shows the web app origin (the bridge origin, e.g. `http://localhost:8005`, also works).
 - Frontend runs on the real services (auth, journal, analytics, mt5) through the dev proxy; real data only, no simulated trades, balances or candles.
 - Pages are thin and compose `features/auth`, `journal`, `analytics`, `mt5-connection`, `market`; a global route guard requires a session.
 - Analytics dashboard shows a loading state on retry and account switch; KPI money values are coloured by sign; the trade chart shows "No market data" when the trade is outside the loaded candles.
@@ -11,6 +12,8 @@
 - Vitest is now real (`npx vitest run`); `npx nuxi typecheck` is clean for app code.
 
 ### Added
+- MT5 EA bridge UI (spec 002) on `/mt5` for every signed-in user: generate ingest tokens (plaintext shown once in a copy modal, never stored), revoke them, download the EA ("EA not available yet" until it is published), setup steps incl. the MT5 Allow WebRequest whitelist URL, and bridge accounts with connected / last seen / last deal. The legacy admin-only terminal link stays in its own section.
+- Dev proxy `/api/v1/mt5-bridge` → `NUXT_BRIDGE_URL` (default `http://localhost:8005`); `useApiClient().getBlob` for authenticated downloads.
 - `AGENTS.md`, `.agents/rules/`, `.agents/templates/`: single source of rules for AI agents (replaces `.gemini/rules`).
 - `features/_template` feature module and `composables/useApiClient.ts` (envelope unwrap, `ApiError`).
 - `docs/`: architecture, features catalog, ADR 0001; `specs/`: workflow and drafts 001-004.

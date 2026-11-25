@@ -71,13 +71,11 @@
       </button>
 
       <!-- User Menu -->
-      <span v-if="userEmail" class="hidden lg:block text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[200px]" data-testid="header-email">{{ userEmail }}</span>
       <div class="relative">
         <button
           type="button"
           class="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-semibold ring-1 ring-zinc-200 dark:ring-zinc-700 cursor-pointer shadow-subtle"
           :aria-label="userEmail || userName || 'User menu'"
-          :title="userEmail || userName"
           @click="isUserMenuOpen = !isUserMenuOpen"
         >
           {{ userInitials }}
