@@ -1,33 +1,45 @@
-# 001 — Migrate pages to feature modules (frontend design)
+# 001 — Real data only: login and feature modules (frontend design)
 
-- **Status:** draft
+- **Status:** done (2026-11-24)
 - **Date:** 2026-11-23
 - **Backend (source of truth):** `Trading-bot-backend/specs/001-service-migration/design.md`
+- **Branch:** `feat/001-real-data`
 
 ## Intent
 
-Follow the backend migration: move current pages, stores and components into feature modules that
-call the new services through `useApiClient`, and add real authentication screens.
+The web app shows only real data of the signed-in user, and says so plainly when something is
+unavailable. No demo data, no random candles, no invented balances.
 
 ## Goals
 
-- Features `auth`, `journal`, `analytics` created from `features/_template`.
-- `stores/analytics.ts`, `stores/mt5.ts` and `components/Analytics/*` moved into features; no direct `$fetch`.
-- Auth: sign-in/up, email verification, forgot/reset password using `AppAuthCard`; token stored in an
-  auth store; `useApiClient` sends it; `UNAUTHENTICATED` redirects to login; route middleware for
-  protected pages.
-- Tooling: Vitest + `@nuxt/test-utils`, ESLint + Prettier, `vue-tsc` for `nuxi typecheck`.
-- Fix number formatting (raw floats such as `27.272727…%` on the journal page).
+1. **Login:** pages `/login`, `/register`, `/verify-email`, `/forgot-password`, `/reset-password`
+   using `AppAuthCard`/`AppInput`; global route middleware sends signed-out users to `/login`;
+   `UNAUTHENTICATED` from the API → refresh once, else to `/login`.
+   Tokens: access token in memory + refresh token in `localStorage` (KISS; XSS risk accepted and
+   documented until a cookie-based flow is specified).
+2. **Feature modules** from `features/_template`: `auth`, `journal` (trades table, upload), `analytics`
+   (KPIs, equity, heatmaps), `mt5-connection` (link terminal account, status, sync).
+   `stores/analytics.ts`, `stores/mt5.ts` and their direct `$fetch` calls are removed.
+3. **Real data only:** delete `Math.random` candle generation in `TradeChartMini.vue` /
+   `TradeChartModal.vue`; candles come from `/api/v1/mt5/rates`, else an empty state "No market data".
+   No invented stop loss / take profit (shown only if the trade has them).
+4. **MT5 UI:** "Link MT5 account" shows the account the open terminal reports (login, server, demo/real,
+   balance) and asks to confirm; no password field. Clear states: terminal not running, other
+   account open, synced N trades.
+5. **Correct display:** numbers rounded (2 dp), `null` drawdown % shown as "—", language consistent
+   (i18n en/es everywhere, including modals).
+6. Header/sidebar (`AppHeader`, `AppSidebar`) with user menu and sign-out.
+7. Tooling: Vitest + `@nuxt/test-utils` for api mappers, stores and guards; `vue-tsc` for typecheck.
 
 ## Non-goals
 
-MT5 connection UI (002), strategies (003), AI journal (004).
+OAuth buttons (hidden), several MT5 accounts at once, strategies, AI journal.
 
-## Open questions
+## Anti-goals
 
-- Token storage: httpOnly cookie via backend vs. memory + refresh? (decide with backend 001 auth design)
-- Keep legacy `/upload` page or fold upload into the journal feature?
+Any value on screen that did not come from the API; any page reachable without login (except auth pages).
 
 ## Done when
 
-All pages work against the gateway; no `$fetch` outside `useApiClient`; tests and build green.
+The backend "done when" scenarios work from the browser; `grep Math.random` finds nothing outside
+`AppInput` ids; build, typecheck and Vitest green.

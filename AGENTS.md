@@ -17,17 +17,17 @@ analyzed and journaled (also by AI), and strategies go from backtest to paper to
 
 | Area | Today | Target |
 |---|---|---|
-| Structure | Pages + global `components/`, `stores/`, `composables/` | Feature modules in `features/<feature>/` |
-| Backend access | Stores call `$fetch` directly | Feature `api/` modules via `useApiClient` |
-| Backend | Legacy monolith endpoints (`/api/v1/analytics`, `/mt5`, `/auth`) | Service endpoints through the gateway (spec 001) |
+| Structure | Feature modules in `features/` (auth, journal, analytics, mt5-connection, market); thin `pages/`; shared UI in `components/Common/` | Same, plus strategies and ai-journal |
+| Backend access | Feature `api/` modules via `useApiClient`; access token in memory, refresh token in `localStorage` (`tb.refresh`) | Same, through the gateway |
+| Backend | Real services: auth 8001, journal 8002, analytics 8003, mt5 8004, proxied by the Nuxt dev server | One gateway (planned) |
+| Data | Real data only: no demo data; unavailable data shows an explicit empty/error state | Same |
 
-Existing `pages/`, `components/Analytics/`, `stores/`, `composables/` are **legacy until frontend
-spec 001** migrates them. New features always go in `features/`.
+Spec 001 (done) migrated the legacy pages. New features always go in `features/`.
 
 ## 3. Tech stack
 
 Nuxt 3 · Vue 3 (`<script setup lang="ts">`) · TypeScript strict · Pinia · Tailwind CSS · Lucide icons
-(`lucide-vue-next`) · Plotly.js (equity/drawdown) · Lightweight Charts (candles) · Vitest *(planned, spec 001)*.
+(`lucide-vue-next`) · Plotly.js (equity/drawdown) · Lightweight Charts (candles) · Vitest + Vue Test Utils.
 
 ## 4. Repository map
 
@@ -39,7 +39,7 @@ features/<feature>/                 # api/ types/ stores/ composables/ component
 components/Common/App*.vue          # shared design-system primitives (only shared UI lives here)
 composables/useApiClient.ts         # base HTTP client: base URL, auth header, envelope, ApiError
 pages/                              # thin route components composing features
-components/Analytics/ stores/ composables/ types/   # legacy, migrated by spec 001
+stores/i18n.ts  middleware/auth.global.ts   # translations; global route guard (session required)
 docs/  specs/                       # architecture, catalog, ADRs; design/plan per piece of work
 ```
 
@@ -47,10 +47,15 @@ docs/  specs/                       # architecture, catalog, ADRs; design/plan p
 
 ```bash
 npm install
-npm run dev            # http://localhost:3000 — needs backend on NUXT_PUBLIC_API_BASE_URL (default http://localhost:8000)
+npm run dev            # http://localhost:3000; dev server proxies /api/v1/<service> to the local backend services
+npx vitest run         # unit tests (must be green)
 npm run build          # must pass before every commit that touches code
-npx nuxi typecheck     # requires vue-tsc (planned)
+npx nuxi typecheck     # must be clean for code under features/, pages/, composables/, stores/, middleware/, plugins/
 ```
+
+Dev proxy targets (defaults in `nuxt.config.ts`): `NUXT_AUTH_URL` (http://localhost:8001), `NUXT_JOURNAL_URL` (8002),
+`NUXT_ANALYTICS_URL` (8003), `NUXT_MT5_URL` (8004). `NUXT_PUBLIC_API_BASE_URL` is empty by default (same origin via the proxy)
+and `NUXT_PUBLIC_API_VERSION` is `v1`. Start the backend with its `scripts/dev.ps1`.
 
 Do not run `npm run build` while `npm run dev` is running: both write `.nuxt/` and the dev server breaks.
 
@@ -70,8 +75,7 @@ Do not run `npm run build` while `npm run dev` is running: both write `.nuxt/` a
 
 ## 7. How work is done
 
-Same workflow as the backend: design (approved) → plan → execute → verify (`npm run build`, run the
-page) → update docs → `done`. See `.agents/rules/docs-and-specs.md`.
+Same workflow as the backend: design (approved) → plan → execute → verify (`npx vitest run`, `npm run build`, `npx nuxi typecheck`) → update docs → `done`. See `.agents/rules/docs-and-specs.md`.
 
 ## 8. Rules index
 
