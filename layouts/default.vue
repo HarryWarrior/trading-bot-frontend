@@ -3,6 +3,7 @@
     <template v-if="isAuthenticated">
       <AppHeader
         :user-name="user?.name"
+        :user-email="user?.email"
         :user-role="roleLabel"
         :user-initials="initials"
         @sign-out="handleSignOut"

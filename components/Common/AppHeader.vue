@@ -71,11 +71,13 @@
       </button>
 
       <!-- User Menu -->
+      <span v-if="userEmail" class="hidden lg:block text-xs text-zinc-500 dark:text-zinc-400 truncate max-w-[200px]" data-testid="header-email">{{ userEmail }}</span>
       <div class="relative">
         <button
           type="button"
           class="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-semibold ring-1 ring-zinc-200 dark:ring-zinc-700 cursor-pointer shadow-subtle"
-          :aria-label="userName || 'User menu'"
+          :aria-label="userEmail || userName || 'User menu'"
+          :title="userEmail || userName"
           @click="isUserMenuOpen = !isUserMenuOpen"
         >
           {{ userInitials }}
@@ -86,6 +88,7 @@
         >
           <div class="px-2.5 py-2 space-y-1">
             <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{{ userName }}</p>
+            <p v-if="userEmail" class="text-xs text-zinc-500 truncate">{{ userEmail }}</p>
             <span
               v-if="userRole"
               class="inline-block text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700"
@@ -117,12 +120,14 @@ const props = withDefaults(defineProps<{
   planBadge?: string
   userInitials?: string
   userName?: string
+  userEmail?: string
   userRole?: string
 }>(), {
   workspaceName: "Trading Bot HQ",
   planBadge: "PRO",
   userInitials: "?",
   userName: "",
+  userEmail: "",
   userRole: ""
 })
 
