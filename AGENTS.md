@@ -19,7 +19,7 @@ analyzed and journaled (also by AI), and strategies go from backtest to paper to
 |---|---|---|
 | Structure | Feature modules in `features/` (auth, journal, analytics, mt5-connection, market); thin `pages/`; shared UI in `components/Common/` | Same, plus strategies and ai-journal |
 | Backend access | Feature `api/` modules via `useApiClient`; access token in memory, refresh token in `localStorage` (`tb.refresh`) | Same, through the gateway |
-| Backend | Real services: auth 8001, journal 8002, analytics 8003, mt5 8004, proxied by the Nuxt dev server | One gateway (planned) |
+| Backend | Real services: auth 8001, journal 8002, analytics 8003, mt5 8004, mt5-bridge 8005, proxied by the Nuxt dev server | One gateway (planned) |
 | Data | Real data only: no demo data; unavailable data shows an explicit empty/error state | Same |
 
 Spec 001 (done) migrated the legacy pages. New features always go in `features/`.
@@ -54,7 +54,7 @@ npx nuxi typecheck     # must be clean for code under features/, pages/, composa
 ```
 
 Dev proxy targets (defaults in `nuxt.config.ts`): `NUXT_AUTH_URL` (http://localhost:8001), `NUXT_JOURNAL_URL` (8002),
-`NUXT_ANALYTICS_URL` (8003), `NUXT_MT5_URL` (8004). `NUXT_PUBLIC_API_BASE_URL` is empty by default (same origin via the proxy)
+`NUXT_ANALYTICS_URL` (8003), `NUXT_MT5_URL` (8004), `NUXT_BRIDGE_URL` (8005, `mt5-bridge`). `NUXT_PUBLIC_API_BASE_URL` is empty by default (same origin via the proxy)
 and `NUXT_PUBLIC_API_VERSION` is `v1`. Start the backend with its `scripts/dev.ps1`.
 
 Do not run `npm run build` while `npm run dev` is running: both write `.nuxt/` and the dev server breaks.

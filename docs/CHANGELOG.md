@@ -11,6 +11,8 @@
 - Vitest is now real (`npx vitest run`); `npx nuxi typecheck` is clean for app code.
 
 ### Added
+- MT5 EA bridge UI (spec 002) on `/mt5` for every signed-in user: generate ingest tokens (plaintext shown once in a copy modal, never stored), revoke them, download the EA ("EA not available yet" until it is published), setup steps incl. the MT5 Allow WebRequest whitelist URL, and bridge accounts with connected / last seen / last deal. The legacy admin-only terminal link stays in its own section.
+- Dev proxy `/api/v1/mt5-bridge` → `NUXT_BRIDGE_URL` (default `http://localhost:8005`); `useApiClient().getBlob` for authenticated downloads.
 - `AGENTS.md`, `.agents/rules/`, `.agents/templates/`: single source of rules for AI agents (replaces `.gemini/rules`).
 - `features/_template` feature module and `composables/useApiClient.ts` (envelope unwrap, `ApiError`).
 - `docs/`: architecture, features catalog, ADR 0001; `specs/`: workflow and drafts 001-004.

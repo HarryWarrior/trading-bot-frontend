@@ -43,6 +43,19 @@ const toApiError = (error: unknown): ApiError => {
   return new ApiError(`HTTP_${status}`, `Request failed with status ${status}.`, status)
 }
 
+/** Binary responses (`responseType: 'blob'`) deliver their JSON error envelope as a Blob too: read it back. */
+const readBlobError = async (error: unknown): Promise<unknown> => {
+  const fetchError = error as { status?: number; statusCode?: number; data?: unknown }
+  if (!(fetchError?.data instanceof Blob)) return error
+  // ofetch exposes status as non-enumerable getters: copy them explicitly instead of spreading.
+  const base = { status: fetchError.status, statusCode: fetchError.statusCode }
+  try {
+    return { ...base, data: JSON.parse(await fetchError.data.text()) }
+  } catch {
+    return base
+  }
+}
+
 type FetchOptions = NonNullable<Parameters<typeof $fetch>[1]>
 
 /** Shared by every client instance: concurrent 401s must trigger a single refresh (tokens rotate). */
@@ -70,21 +83,21 @@ export const useApiClient = () => {
   const config = useRuntimeConfig()
   const baseURL = `${config.public.apiBaseUrl}/api/${config.public.apiVersion}`
 
-  const send = async <T>(path: string, options: FetchOptions): Promise<T> => {
+  const send = async <T>(path: string, options: FetchOptions, raw = false): Promise<T> => {
     const token = getAuthHooks()?.getAccessToken() ?? null
     const headers = { ...(options.headers as Record<string, string> | undefined) }
     if (token) headers.Authorization = `Bearer ${token}`
-    const envelope = await $fetch<SuccessEnvelope<T>>(path, { baseURL, ...options, headers } as never)
-    return (envelope as SuccessEnvelope<T>).data
+    const response = await $fetch<SuccessEnvelope<T> | T>(path, { baseURL, ...options, headers } as never)
+    return raw ? (response as T) : (response as SuccessEnvelope<T>).data
   }
 
-  const request = async <T>(path: string, options: FetchOptions = {}, call: CallOptions = {}): Promise<T> => {
+  const request = async <T>(path: string, options: FetchOptions = {}, call: CallOptions = {}, raw = false): Promise<T> => {
     const hooks = getAuthHooks()
     const sentToken = hooks?.getAccessToken() ?? null
     try {
-      return await send<T>(path, options)
+      return await send<T>(path, options, raw)
     } catch (first) {
-      const error = toApiError(first)
+      const error = toApiError(await readBlobError(first))
       if (call.skipAuthRefresh) {
         if (call.sessionEndsOn401 && error.status === 401) hooks?.onSessionExpired()
         throw error
@@ -104,9 +117,9 @@ export const useApiClient = () => {
         }
       }
       try {
-        return await send<T>(path, options)
+        return await send<T>(path, options, raw)
       } catch (second) {
-        const retryError = toApiError(second)
+        const retryError = toApiError(await readBlobError(second))
         if (retryError.code === 'UNAUTHENTICATED') hooks.onSessionExpired()
         throw retryError
       }
@@ -124,5 +137,8 @@ export const useApiClient = () => {
     patch: <T>(path: string, body?: Body, extra: Extra = {}) => request<T>(path, { headers: extra.headers, method: 'PATCH', body }, extra),
     delete: <T>(path: string, query?: Record<string, unknown>, extra: Extra = {}) =>
       request<T>(path, { headers: extra.headers, method: 'DELETE', query }, extra),
+    /** Authenticated binary download (no envelope); errors still become `ApiError`. */
+    getBlob: (path: string, query?: Record<string, unknown>, extra: Extra = {}) =>
+      request<Blob>(path, { headers: extra.headers, method: 'GET', query, responseType: 'blob' }, extra, true),
   }
 }

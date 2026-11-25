@@ -32,12 +32,14 @@ export default defineNuxtConfig({
     },
 
     // Same-origin in dev: the browser calls /api/v1/<service>/... and Nitro forwards to each service.
+    // Nitro registers devProxy routes in reverse-sorted order, so /api/v1/mt5-bridge wins over the /api/v1/mt5 prefix.
     nitro: {
         devProxy: {
             '/api/v1/auth': { target: `${process.env.NUXT_AUTH_URL || 'http://localhost:8001'}/api/v1/auth`, changeOrigin: true },
             '/api/v1/journal': { target: `${process.env.NUXT_JOURNAL_URL || 'http://localhost:8002'}/api/v1/journal`, changeOrigin: true },
             '/api/v1/analytics': { target: `${process.env.NUXT_ANALYTICS_URL || 'http://localhost:8003'}/api/v1/analytics`, changeOrigin: true },
-            '/api/v1/mt5': { target: `${process.env.NUXT_MT5_URL || 'http://localhost:8004'}/api/v1/mt5`, changeOrigin: true }
+            '/api/v1/mt5': { target: `${process.env.NUXT_MT5_URL || 'http://localhost:8004'}/api/v1/mt5`, changeOrigin: true },
+            '/api/v1/mt5-bridge': { target: `${process.env.NUXT_BRIDGE_URL || 'http://localhost:8005'}/api/v1/mt5-bridge`, changeOrigin: true }
         }
     },
 

@@ -168,4 +168,34 @@ describe('useApiClient', () => {
     expect(refresh).not.toHaveBeenCalled()
     expect(onSessionExpired).not.toHaveBeenCalled()
   })
+
+  it('getBlob returns the raw blob with the bearer token and no envelope unwrap', async () => {
+    setAuthHooks({ getAccessToken: () => 'tok', refresh: vi.fn(), onSessionExpired: vi.fn() })
+    const blob = new Blob(['bin'])
+    fetchMock.mockResolvedValue(blob)
+    expect(await useApiClient().getBlob('/f')).toBe(blob)
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ method: 'GET', responseType: 'blob', headers: { Authorization: 'Bearer tok' } })
+  })
+
+  it('getBlob reads a JSON error envelope delivered as a blob', async () => {
+    const body = JSON.stringify({ success: false, error: { code: 'NOT_FOUND', message: 'missing' } })
+    fetchMock.mockRejectedValue({ status: 404, data: new Blob([body]) })
+    await expect(useApiClient().getBlob('/f')).rejects.toMatchObject({ code: 'NOT_FOUND', status: 404 })
+  })
+
+  it('getBlob refreshes once on a 401 delivered as a blob', async () => {
+    let token = 'old'
+    const refresh = vi.fn(async () => { token = 'new'; return 'ok' as const })
+    setAuthHooks({ getAccessToken: () => token, refresh, onSessionExpired: vi.fn() })
+    const body = JSON.stringify({ success: false, error: { code: 'UNAUTHENTICATED', message: 'expired' } })
+    const blob = new Blob(['bin'])
+    fetchMock.mockRejectedValueOnce({ status: 401, data: new Blob([body]) }).mockResolvedValueOnce(blob)
+    expect(await useApiClient().getBlob('/f')).toBe(blob)
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('getBlob falls back to HTTP_<status> for a non-JSON blob error', async () => {
+    fetchMock.mockRejectedValue({ status: 500, data: new Blob(['<html>']) })
+    await expect(useApiClient().getBlob('/f')).rejects.toMatchObject({ code: 'HTTP_500' })
+  })
 })
